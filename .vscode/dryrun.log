@@ -1,0 +1,5 @@
+make --dry-run --keep-going --print-directory
+make: Entering directory '/home/saarmichael/project/cstruct/ex5'
+make: 'showBMP' is up to date.
+make: Leaving directory '/home/saarmichael/project/cstruct/ex5'
+ 
