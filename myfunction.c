@@ -1,4 +1,6 @@
 #include <stdbool.h> 
+#define min(a, b) ((a) < (b)) ? ((a) : (b))
+#define max(a, b) ((a) > (b)) ? ((a) : (b))
 
 typedef struct {
    unsigned char red;
@@ -15,8 +17,8 @@ typedef struct {
 
 
 /* Compute min and max of two integers, respectively */
-int min(int a, int b) { return (a < b ? a : b); }
-int max(int a, int b) { return (a > b ? a : b); }
+//int min(int a, int b) { return (a < b ? a : b); }
+//int max(int a, int b) { return (a > b ? a : b); }
 
 int calcIndex(int i, int j, int n) {
 	return ((i)*(n)+(j));
@@ -62,6 +64,7 @@ static void sum_pixels_by_weight(pixel_sum *sum, pixel p, int weight) {
 /*
  *  Applies kernel for pixel at (i,j)
  */
+// calculating the second sigma
 static pixel applyKernel(int dim, int i, int j, pixel *src, int kernelSize, int kernel[kernelSize][kernelSize], int kernelScale, bool filter) {
 
 	int ii, jj;

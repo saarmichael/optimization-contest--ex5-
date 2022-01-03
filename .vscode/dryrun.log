@@ -1,5 +1,8 @@
-make --dry-run --keep-going --print-directory
+make --dry-run --always-make --keep-going --print-directory
 make: Entering directory '/home/saarmichael/project/cstruct/ex5'
-make: 'showBMP' is up to date.
+gcc  -pg -o showBMP.o -c showBMP.c
+gcc  -pg -o readBMP.o -c readBMP.c	
+gcc  -pg -o writeBMP.o -c writeBMP.c
+gcc -pg -o showBMP readBMP.o writeBMP.o showBMP.o -lm   -lglut -lGL -lGLU -lX11 -lXmu -lXi -L/usr/X11R6/lib
 make: Leaving directory '/home/saarmichael/project/cstruct/ex5'
  

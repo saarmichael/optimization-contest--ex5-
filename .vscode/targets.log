@@ -1,6 +1,4 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
-make: *** No rule to make target 'all'.  Stop.
- 
 # GNU Make 4.2.1
 # Built for x86_64-pc-linux-gnu
 # Copyright (C) 1988-2016 Free Software Foundation, Inc.
@@ -8,7 +6,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sun Jan  2 00:17:12 2022
+# Make data base, printed on Mon Jan  3 14:48:40 2022
 
 # Variables
 
@@ -61,7 +59,7 @@ XDG_RUNTIME_DIR = /mnt/wslg/runtime-dir
 # environment
 VSCODE_LOG_STACK = false
 # environment
-VSCODE_IPC_HOOK_CLI = /mnt/wslg/runtime-dir/vscode-ipc-8e3f751c-66d7-4892-a1f4-19b3f44a985f.sock
+VSCODE_IPC_HOOK_CLI = /mnt/wslg/runtime-dir/vscode-ipc-04fff280-0cef-4399-a8f4-78e93f2ccacb.sock
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
 # environment
@@ -77,7 +75,7 @@ PWD = /home/saarmichael/project/cstruct/ex5
 # default
 .LOADED := 
 # environment
-WSL_INTEROP = /run/WSL/12184_interop
+WSL_INTEROP = /run/WSL/8_interop
 # environment
 PULSE_SERVER = /mnt/wslg/PulseServer
 # environment
@@ -203,19 +201,19 @@ showBMP: showBMP.o readBMP.o writeBMP.o
 #  Modification time never checked.
 #  File has not been updated.
 #  recipe to execute (from 'Makefile', line 4):
-	gcc -pg -no-pie -fno-builtin -o showBMP readBMP.o writeBMP.o showBMP.o $(LDLIBS)
+	gcc -pg -o showBMP readBMP.o writeBMP.o showBMP.o $(LDLIBS)
 
 showBMP.o: showBMP.c myfunction.c
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 #  recipe to execute (from 'Makefile', line 13):
-	gcc -pg -no-pie -fno-builtin -o showBMP.o -c showBMP.c
+	gcc  -pg -o showBMP.o -c showBMP.c
 
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-01-02 00:07:48.968157618
+#  Last modified 2022-01-02 01:48:46.97796865
 #  File has been updated.
 #  Successfully updated.
 
@@ -224,7 +222,7 @@ writeBMP.o: writeBMP.c writeBMP.h readBMP.h
 #  Modification time never checked.
 #  File has not been updated.
 #  recipe to execute (from 'Makefile', line 10):
-	gcc -pg -no-pie -fno-builtin -o writeBMP.o -c writeBMP.c
+	gcc  -pg -o writeBMP.o -c writeBMP.c
 
 # Not a target:
 readBMP.h:
@@ -271,7 +269,7 @@ readBMP.o: readBMP.c readBMP.h
 #  Modification time never checked.
 #  File has not been updated.
 #  recipe to execute (from 'Makefile', line 7):
-	gcc -pg -no-pie -fno-builtin -o readBMP.o -c readBMP.c	
+	gcc  -pg -o readBMP.o -c readBMP.c	
 
 # files hash-table stats:
 # Load=15/1024=1%, Rehash=0, Collisions=0/38=0%
@@ -279,8 +277,10 @@ readBMP.o: readBMP.c readBMP.h
 
 # No 'vpath' search paths.
 
- 
 # No general ('VPATH' variable) search path.
+ 
+make: *** No rule to make target 'all'.  Stop.
+ 
 
 # strcache buffers: 1 (0) / strings = 32 / storage = 383 B / avg = 11 B
 # current buf: size = 8162 B / used = 383 B / count = 32 / avg = 11 B
@@ -288,6 +288,6 @@ readBMP.o: readBMP.c readBMP.h
 # strcache performance: lookups = 55 / hit rate = 41%
 # hash-table stats:
 # Load=32/8192=0%, Rehash=0, Collisions=1/55=2%
-# Finished Make data base on Sun Jan  2 00:17:12 2022
+# Finished Make data base on Mon Jan  3 14:48:40 2022
 
  
