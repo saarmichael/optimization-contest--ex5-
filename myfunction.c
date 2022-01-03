@@ -1,6 +1,6 @@
 #include <stdbool.h> 
-#define min(a, b) ((a) < (b)) ? ((a) : (b))
-#define max(a, b) ((a) > (b)) ? ((a) : (b))
+#define MIN(x,y) ((x<y)?x:y)
+#define MAX(x,y) ((x<y)?x:y)
 
 typedef struct {
    unsigned char red;
@@ -16,7 +16,7 @@ typedef struct {
 } pixel_sum;
 
 
-/* Compute min and max of two integers, respectively */
+/* Compute MIN and MAX of two integers, respectively */
 //int min(int a, int b) { return (a < b ? a : b); }
 //int max(int a, int b) { return (a > b ? a : b); }
 
@@ -44,9 +44,10 @@ static void assign_sum_to_pixel(pixel *current_pixel, pixel_sum sum, int kernelS
 	sum.blue = sum.blue / kernelScale;
 
 	// truncate each pixel's color values to match the range [0,255]
-	current_pixel->red = (unsigned char) (min(max(sum.red, 0), 255));
-	current_pixel->green = (unsigned char) (min(max(sum.green, 0), 255));
-	current_pixel->blue = (unsigned char) (min(max(sum.blue, 0), 255));
+	
+	current_pixel->red = (unsigned char) (MIN( MAX(sum.red, 0), 255));
+	current_pixel->green = (unsigned char) (MIN(MAX(sum.green, 0), 255));
+	current_pixel->blue = (unsigned char) (MIN(MAX(sum.blue, 0), 255));
 	return;
 }
 
@@ -71,17 +72,17 @@ static pixel applyKernel(int dim, int i, int j, pixel *src, int kernelSize, int 
 	int currRow, currCol;
 	pixel_sum sum;
 	pixel current_pixel;
-	int min_intensity = 766; // arbitrary value that is higher than maximum possible intensity, which is 255*3=765
-	int max_intensity = -1; // arbitrary value that is lower than minimum possible intensity, which is 0
-	int min_row, min_col, max_row, max_col;
+	int MIN_intensity = 766; // arbitrary value that is higher than MAXimum possible intensity, which is 255*3=765
+	int MAX_intensity = -1; // arbitrary value that is lower than MINimum possible intensity, which is 0
+	int MIN_row, MIN_col, MAX_row, MAX_col;
 	pixel loop_pixel;
 
 	initialize_pixel_sum(&sum);
 
-	int istart = max(i-1, 0);
-	int istop = min(i+1, dim-1);
+	int istart = MAX(i-1, 0);
+	int istop = MIN(i+1, dim-1);
 	for(ii = istart; ii <= istop; ii++) {
-		for(jj = max(j-1, 0); jj <= min(j+1, dim-1); jj++) {
+		for(jj = MAX(j-1, 0); jj <= MIN(j+1, dim-1); jj++) {
 
 			int kRow, kCol;
 
@@ -109,26 +110,26 @@ static pixel applyKernel(int dim, int i, int j, pixel *src, int kernelSize, int 
 	}
 
 	if (filter) {
-		// find min and max coordinates
-		for(ii = max(i-1, 0); ii <= min(i+1, dim-1); ii++) {
-			for(jj = max(j-1, 0); jj <= min(j+1, dim-1); jj++) {
-				// check if smaller than min or higher than max and update
+		// find MIN and MAX coordinates
+		for(ii = MAX(i-1, 0); ii <= MIN(i+1, dim-1); ii++) {
+			for(jj = MAX(j-1, 0); jj <= MIN(j+1, dim-1); jj++) {
+				// check if smaller than MIN or higher than MAX and update
 				loop_pixel = src[calcIndex(ii, jj, dim)];
-				if ((((int) loop_pixel.red) + ((int) loop_pixel.green) + ((int) loop_pixel.blue)) <= min_intensity) {
-					min_intensity = (((int) loop_pixel.red) + ((int) loop_pixel.green) + ((int) loop_pixel.blue));
-					min_row = ii;
-					min_col = jj;
+				if ((((int) loop_pixel.red) + ((int) loop_pixel.green) + ((int) loop_pixel.blue)) <= MIN_intensity) {
+					MIN_intensity = (((int) loop_pixel.red) + ((int) loop_pixel.green) + ((int) loop_pixel.blue));
+					MIN_row = ii;
+					MIN_col = jj;
 				}
-				if ((((int) loop_pixel.red) + ((int) loop_pixel.green) + ((int) loop_pixel.blue)) > max_intensity) {
-					max_intensity = (((int) loop_pixel.red) + ((int) loop_pixel.green) + ((int) loop_pixel.blue));
-					max_row = ii;
-					max_col = jj;
+				if ((((int) loop_pixel.red) + ((int) loop_pixel.green) + ((int) loop_pixel.blue)) > MAX_intensity) {
+					MAX_intensity = (((int) loop_pixel.red) + ((int) loop_pixel.green) + ((int) loop_pixel.blue));
+					MAX_row = ii;
+					MAX_col = jj;
 				}
 			}
 		}
-		// filter out min and max
-		sum_pixels_by_weight(&sum, src[calcIndex(min_row, min_col, dim)], -1);
-		sum_pixels_by_weight(&sum, src[calcIndex(max_row, max_col, dim)], -1);
+		// filter out MIN and MAX
+		sum_pixels_by_weight(&sum, src[calcIndex(MIN_row, MIN_col, dim)], -1);
+		sum_pixels_by_weight(&sum, src[calcIndex(MAX_row, MAX_col, dim)], -1);
 	}
 
 	// assign kernel's result to pixel at [i,j]

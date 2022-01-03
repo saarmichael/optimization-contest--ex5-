@@ -26,5 +26,9 @@
     "**/.*/**",
     "**/.vscode",
     "**/.vscode/**"
-  ]
+  ],
+  "files.associations": {
+    "limits": "c",
+    "*.tcc": "c"
+  }
 }
