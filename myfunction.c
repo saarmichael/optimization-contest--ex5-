@@ -1,6 +1,8 @@
 #include <stdbool.h> 
+#define CALCINDEX(i, j, n) ((i)*(n)+(j))
 #define MIN(x,y) ((x<y)?x:y)
-#define MAX(x,y) ((x<y)?x:y)
+#define MAX(x,y) ((x>y)?x:y)
+
 
 typedef struct {
    unsigned char red;
@@ -17,12 +19,12 @@ typedef struct {
 
 
 /* Compute MIN and MAX of two integers, respectively */
-//int min(int a, int b) { return (a < b ? a : b); }
-//int max(int a, int b) { return (a > b ? a : b); }
+// int MIN(int a, int b) { return (a < b ? a : b); }
+// int MAX(int a, int b) { return (a > b ? a : b); }
 
-int calcIndex(int i, int j, int n) {
-	return ((i)*(n)+(j));
-}
+// int CALCINDEX(int i, int j, int n) {
+// 	return ((i)*(n)+(j));
+// }
 
 /*
  * initialize_pixel_sum - Initializes all fields of sum to 0
@@ -105,7 +107,7 @@ static pixel applyKernel(int dim, int i, int j, pixel *src, int kernelSize, int 
 			}
 
 			// apply kernel on pixel at [ii,jj]
-			sum_pixels_by_weight(&sum, src[calcIndex(ii, jj, dim)], kernel[kRow][kCol]);
+			sum_pixels_by_weight(&sum, src[CALCINDEX(ii, jj, dim)], kernel[kRow][kCol]);
 		}
 	}
 
@@ -114,7 +116,7 @@ static pixel applyKernel(int dim, int i, int j, pixel *src, int kernelSize, int 
 		for(ii = MAX(i-1, 0); ii <= MIN(i+1, dim-1); ii++) {
 			for(jj = MAX(j-1, 0); jj <= MIN(j+1, dim-1); jj++) {
 				// check if smaller than MIN or higher than MAX and update
-				loop_pixel = src[calcIndex(ii, jj, dim)];
+				loop_pixel = src[CALCINDEX(ii, jj, dim)];
 				if ((((int) loop_pixel.red) + ((int) loop_pixel.green) + ((int) loop_pixel.blue)) <= MIN_intensity) {
 					MIN_intensity = (((int) loop_pixel.red) + ((int) loop_pixel.green) + ((int) loop_pixel.blue));
 					MIN_row = ii;
@@ -128,8 +130,8 @@ static pixel applyKernel(int dim, int i, int j, pixel *src, int kernelSize, int 
 			}
 		}
 		// filter out MIN and MAX
-		sum_pixels_by_weight(&sum, src[calcIndex(MIN_row, MIN_col, dim)], -1);
-		sum_pixels_by_weight(&sum, src[calcIndex(MAX_row, MAX_col, dim)], -1);
+		sum_pixels_by_weight(&sum, src[CALCINDEX(MIN_row, MIN_col, dim)], -1);
+		sum_pixels_by_weight(&sum, src[CALCINDEX(MAX_row, MAX_col, dim)], -1);
 	}
 
 	// assign kernel's result to pixel at [i,j]
@@ -147,7 +149,7 @@ void smooth(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[kernelSi
 	int i, j;
 	for (i = kernelSize / 2 ; i < dim - kernelSize / 2; i++) {
 		for (j =  kernelSize / 2 ; j < dim - kernelSize / 2 ; j++) {
-			dst[calcIndex(i, j, dim)] = applyKernel(dim, i, j, src, kernelSize, kernel, kernelScale, filter);
+			dst[CALCINDEX(i, j, dim)] = applyKernel(dim, i, j, src, kernelSize, kernel, kernelScale, filter);
 		}
 	}
 }
