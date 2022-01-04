@@ -148,6 +148,148 @@ void smooth(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[kernelSi
 	}
 }
 
+
+void smoothNoFilter(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[kernelSize][kernelSize], int kernelScale) {
+	int div = dim % 3;
+	int jump = 2*dim;
+	// create 9 pointers representing the template to work on
+	pixel* a = src;
+	pixel* x = a + 1;
+	pixel* u = x + 1;
+	pixel* b = a + dim;
+	pixel* y = b + 1;
+	pixel* v = y + 1;
+	pixel* c = b + dim;
+	pixel* z = c + 1;
+	pixel* w = z + 1;
+
+	pixel* dstPixel = dst + dim + 1;
+
+	pixel ka, kb, kc, kx, ky, kz, ku, kv, kw;
+	register int redSum, greenSum, blueSum;
+
+	for (unsigned int i = 1; i < dim - 1; i++) {
+		for (unsigned int j = 1; i < dim - 1; i++) {
+			redSum = 0;
+			greenSum = 0;
+			blueSum = 0;
+			// ka =  *a;
+			// kx =  *x;
+			// ku =  *u;
+			// kb =  *b;
+			// ky =  *y;
+			// kv =  *v;
+			// kc =  *c;
+			// kz =  *z;
+			// kw =  *w;
+
+			// the equivalent of applykernel multiplication
+			redSum   += a->red   + x->red   + u->red;
+			greenSum += a->green + x->green + u->green;
+			blueSum  += a->blue  + x->blue  + u->blue;
+
+			redSum   += b->red   + y->red   + v->red;
+			greenSum += b->green + y->green + v->green;
+			blueSum  += b->blue  + y->blue  + v->blue;
+
+			redSum   += c->red   + z->red   + w->red;
+			greenSum += c->green + z->green + w->green;
+			blueSum  += c->blue  + z->blue  + w->blue;
+			
+			// get the average
+			// redSum   = redSum   / 9;
+			// greenSum = greenSum / 9;
+			// blueSum  = blueSum  / 9;
+			dstPixel->red   = redSum / kernelScale;
+			dstPixel->green = greenSum / kernelScale;
+			dstPixel->blue  = blueSum / kernelScale;
+			// moving on to the next pixel
+			
+
+			// !!! if dim % 3 == 0 stop here !!!
+			if (j == dim - 1) {
+				a += 2 + jump;
+				b += 2 + jump;
+				c += 2 + jump;
+				x += 1 + jump;
+				y += 1 + jump;
+				z += 1 + jump;
+				u +=     jump;
+				v +=     jump;
+				w +=     jump;
+				break;
+			}
+			++j;
+			// the second pixel in this iteration:
+			++dstPixel;
+			// update only the changed pixels
+			redSum   -= a->red   + b->red   + c->red;
+			greenSum -= a->green + b->green + c->green;
+			blueSum  -= a->blue  + b->blue  + c->blue;
+			a = u + 1;
+			b = v + 1;
+			c = w + 1;
+			redSum   += a->red   + b->red   + c->red;
+			greenSum += a->green + b->green + c->green;
+			blueSum  += a->blue  + b->blue  + c->blue;
+			
+			dstPixel->red   = redSum / kernelScale;
+			dstPixel->green = greenSum / kernelScale;
+			dstPixel->blue  = blueSum / kernelScale;
+			
+			if (j == dim - 1) {
+				a +=     jump;
+				b +=     jump;
+				c +=     jump;
+				x += 2 + jump;
+				y += 2 + jump;
+				z += 2 + jump;
+				u += 1 + jump;
+				v += 1 + jump;
+				w += 1 + jump;
+				break;
+			}
+			++j;
+			// moving on to the third pixel:
+			++dstPixel;
+			
+			redSum   -= x->red   + y->red   + z->red;
+			greenSum -= x->green + y->green + z->green;
+			blueSum  -= x->blue  + y->blue  + z->blue;
+			x = a + 1;
+			y = b + 1;
+			z = c + 1;
+			redSum   += x->red   + y->red   + z->red;
+			greenSum += x->green + y->green + z->green;
+			blueSum  += x->blue  + y->blue  + z->blue;
+			
+			dstPixel->red   = redSum / kernelScale;
+			dstPixel->green = greenSum / kernelScale;
+			dstPixel->blue  = blueSum / kernelScale;
+
+			// finally
+			u = x + 1;
+			v = y + 1;
+			w = z + 1;
+			++dstPixel;
+			if (j == dim - 1) {
+				a += 1 + jump;
+				b += 1 + jump;
+				c += 1 + jump;
+				x +=     jump;
+				y +=     jump;
+				z +=     jump;
+				u += 2 + jump;
+				v += 2 + jump;
+				w += 2 + jump;
+			}
+		}
+		
+	}
+	
+}
+
+
 void charsToPixels(Image *charsImg, pixel* pixels) {
 
 	int row, col;
@@ -196,8 +338,13 @@ void doConvolution(Image *image, int kernelSize, int kernel[kernelSize][kernelSi
 
 	charsToPixels(image, pixelsImg);
 	copyPixels(pixelsImg, backupOrg);
-
-	smooth(m, backupOrg, pixelsImg, kernelSize, kernel, kernelScale, filter);
+	if (filter)
+	{
+		smooth(m, backupOrg, pixelsImg, kernelSize, kernel, kernelScale, filter);
+	} else {
+		smoothNoFilter(m, backupOrg, pixelsImg, kernelSize, kernel, kernelScale);
+	}
+	
 
 	pixelsToChars(pixelsImg, image);
 
