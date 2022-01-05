@@ -1,5 +1,8 @@
 #include <stdbool.h> 
 
+#define MIN(x,y) ((x<y)?x:y)
+#define MAX(x,y) ((x>y)?x:y)
+
 typedef struct {
    unsigned char red;
    unsigned char green;
@@ -167,9 +170,9 @@ void smoothNoFilter(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[
 
 	//pixel ka, kb, kc, kx, ky, kz, ku, kv, kw;
 	register int redSum, greenSum, blueSum;
-
-	for (unsigned int i = 1; i < dim - 1; i++) {
-		for (unsigned int j = 1; j < dim - 1; j++) {
+	unsigned int i, j;
+	for (i = 1; i < dim - 1; i++) {
+		for ( j = 1; j < dim - 1; j++) {
 			//printf("i = %d, j = %d\n", i ,j);
 			redSum = 0;
 			greenSum = 0;
@@ -235,9 +238,9 @@ void sharpNoFilter(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[k
 
 	//pixel ka, kb, kc, kx, ky, kz, ku, kv, kw;
 	register int redSum, greenSum, blueSum;
-
-	for (unsigned int i = 1; i < dim - 1; i++) {
-		for (unsigned int j = 1; j < dim - 1; j++) {
+	unsigned int i, j;
+	for ( i = 1; i < dim - 1; i++) {
+		for ( j = 1; j < dim - 1; j++) {
 			//printf("i = %d, j = %d\n", i ,j);
 			redSum = 0;
 			greenSum = 0;
@@ -252,23 +255,23 @@ void sharpNoFilter(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[k
 			// kz =  *z;
 			// kw =  *w;
 
-			// the equivalent of applykernel multiplication
-			redSum   += a->red   + x->red   + u->red;
-			greenSum += a->green + x->green + u->green;
-			blueSum  += a->blue  + x->blue  + u->blue;
+			// the equivalent of applykernel multiplication for kernel {{-1,-1,-1}, {-1, 9, -1}, {-1, -1 ,-1}}
+			redSum   -= a->red   + x->red   + u->red;
+			greenSum -= a->green + x->green + u->green;
+			blueSum  -= a->blue  + x->blue  + u->blue;
 
-			redSum   += b->red   + y->red   + v->red;
-			greenSum += b->green + y->green + v->green;
-			blueSum  += b->blue  + y->blue  + v->blue;
+			redSum   += -1*b->red   + 9*y->red   + -1*v->red;
+			greenSum += -1*b->green + 9*y->green + -1*v->green;
+			blueSum  += -1*b->blue  + 9*y->blue  + -1*v->blue;
 
-			redSum   += c->red   + z->red   + w->red;
-			greenSum += c->green + z->green + w->green;
-			blueSum  += c->blue  + z->blue  + w->blue;
+			redSum   -= c->red   + z->red   + w->red;
+			greenSum -= c->green + z->green + w->green;
+			blueSum  -= c->blue  + z->blue  + w->blue;
 			
 			
-			dstPixel->red   = redSum / kernelScale;
-			dstPixel->green = greenSum / kernelScale;
-			dstPixel->blue  = blueSum / kernelScale;
+			dstPixel->red   = MIN(MAX(redSum,0), 255);
+			dstPixel->green =  MIN(MAX(greenSum,0), 255);
+			dstPixel->blue  =  MIN(MAX(blueSum,0), 255);
 			// moving on to the next pixel
 			++dstPixel;
 			++a;
@@ -369,6 +372,22 @@ void doConvolution2(Image *image, int kernelSize, int kernel[kernelSize][kernelS
 	free(backupOrg);
 }
 
+void doConvolution3(Image *image, int kernelSize, int kernel[kernelSize][kernelSize], int kernelScale, bool filter) {
+
+	pixel* pixelsImg = malloc(m*n*sizeof(pixel));
+	pixel* backupOrg = malloc(m*n*sizeof(pixel));
+
+	charsToPixels(image, pixelsImg);
+	copyPixels(pixelsImg, backupOrg);
+
+	smooth(m, backupOrg, pixelsImg, kernelSize, kernel, kernelScale, filter);
+
+	pixelsToChars(pixelsImg, image);
+
+	free(pixelsImg);
+	free(backupOrg);
+}
+
 void myfunction(Image *image, char* srcImgpName, char* blurRsltImgName, char* sharpRsltImgName, char* filteredBlurRsltImgName, char* filteredSharpRsltImgName, char flag) {
 
 	/*
@@ -399,13 +418,13 @@ void myfunction(Image *image, char* srcImgpName, char* blurRsltImgName, char* sh
 		writeBMP(image, srcImgpName, sharpRsltImgName);	
 	} else {
 		// apply extermum filtered kernel to blur image
-		doConvolution(image, 3, blurKernel, 7, true);
+		doConvolution3(image, 3, blurKernel, 7, true);
 
 		// write result image to file
 		writeBMP(image, srcImgpName, filteredBlurRsltImgName);
 
 		// sharpen the resulting image
-		doConvolution(image, 3, sharpKernel, 1, false);
+		doConvolution3(image, 3, sharpKernel, 1, false);
 
 		// write result image to file
 		writeBMP(image, srcImgpName, filteredSharpRsltImgName);	
