@@ -169,7 +169,7 @@ void smoothNoFilter(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[
 	register int redSum, greenSum, blueSum;
 
 	for (unsigned int i = 1; i < dim - 1; i++) {
-		for (unsigned int j = 1; i < dim - 1; i++) {
+		for (unsigned int j = 1; j < dim - 1; j++) {
 			redSum = 0;
 			greenSum = 0;
 			blueSum = 0;
