@@ -1,4 +1,6 @@
 #include <stdbool.h> 
+#define MIN(x,y) ((x<y)?x:y)
+#define MAX(x,y) ((x>y)?x:y)
 
 typedef struct {
    unsigned char red;
@@ -290,6 +292,75 @@ void smoothNoFilter(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[
 }
 
 
+void sharpNoFilter(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[kernelSize][kernelSize], int kernelScale) {
+	// int div = dim % 3;
+	// int jump = 2*dim;
+	// create 9 pointers representing the template to work on
+	pixel* a = src;
+	pixel* x = src + 1;
+	pixel* u = src + 2;
+	pixel* b = src + dim;
+	pixel* y = src + dim + 1;
+	pixel* v = src + dim + 2;
+	pixel* c = src + 2*dim;
+	pixel* z = src + 2*dim + 1;
+	pixel* w = src + 2*dim + 2;
+
+	pixel* dstPixel = dst + dim + 1;
+
+	//pixel ka, kb, kc, kx, ky, kz, ku, kv, kw;
+	register int redSum, greenSum, blueSum;
+	unsigned int i, j;
+	for ( i = 1; i < dim - 1; i++) {
+		for ( j = 1; j < dim - 1; j++) {
+			//printf("i = %d, j = %d\n", i ,j);
+			redSum = 0;
+			greenSum = 0;
+			blueSum = 0;
+			// ka =  *a;
+			// kx =  *x;
+			// ku =  *u;
+			// kb =  *b;
+			// ky =  *y;
+			// kv =  *v;
+			// kc =  *c;
+			// kz =  *z;
+			// kw =  *w;
+
+			// the equivalent of applykernel multiplication for kernel {{-1,-1,-1}, {-1, 9, -1}, {-1, -1 ,-1}}
+			redSum   -= a->red   + x->red   + u->red;
+			greenSum -= a->green + x->green + u->green;
+			blueSum  -= a->blue  + x->blue  + u->blue;
+
+			redSum   += -1*b->red   + 9*y->red   + -1*v->red;
+			greenSum += -1*b->green + 9*y->green + -1*v->green;
+			blueSum  += -1*b->blue  + 9*y->blue  + -1*v->blue;
+
+			redSum   -= c->red   + z->red   + w->red;
+			greenSum -= c->green + z->green + w->green;
+			blueSum  -= c->blue  + z->blue  + w->blue;
+			
+			
+			dstPixel->red   = MIN(MAX(redSum,0), 255);
+			dstPixel->green =  MIN(MAX(greenSum,0), 255);
+			dstPixel->blue  =  MIN(MAX(blueSum,0), 255);
+			// moving on to the next pixel
+			++dstPixel;
+			++a;
+			++b;
+			++c;
+			++x;
+			++y;
+			++z;
+			++u;
+			++v;
+			++w;
+		}
+	}
+	
+}
+
+
 void charsToPixels(Image *charsImg, pixel* pixels) {
 
 	int row, col;
@@ -331,7 +402,7 @@ void copyPixels(pixel* src, pixel* dst) {
 	}
 }
 
-void doConvolution(Image *image, int kernelSize, int kernel[kernelSize][kernelSize], int kernelScale, bool filter) {
+void doConvolution1(Image *image, int kernelSize, int kernel[kernelSize][kernelSize], int kernelScale, bool filter) {
 
 	pixel* pixelsImg = malloc(m*n*sizeof(pixel));
 	pixel* backupOrg = malloc(m*n*sizeof(pixel));
@@ -345,6 +416,43 @@ void doConvolution(Image *image, int kernelSize, int kernel[kernelSize][kernelSi
 		smoothNoFilter(m, backupOrg, pixelsImg, kernelSize, kernel, kernelScale);
 	}
 	
+
+	pixelsToChars(pixelsImg, image);
+
+	free(pixelsImg);
+	free(backupOrg);
+}
+
+void doConvolution2(Image *image, int kernelSize, int kernel[kernelSize][kernelSize], int kernelScale, bool filter) {
+
+	pixel* pixelsImg = malloc(m*n*sizeof(pixel));
+	pixel* backupOrg = malloc(m*n*sizeof(pixel));
+
+	charsToPixels(image, pixelsImg);
+	copyPixels(pixelsImg, backupOrg);
+	if (filter)
+	{
+		smooth(m, backupOrg, pixelsImg, kernelSize, kernel, kernelScale, filter);
+	} else {
+		sharpNoFilter(m, backupOrg, pixelsImg, kernelSize, kernel, kernelScale);
+	}
+	
+
+	pixelsToChars(pixelsImg, image);
+
+	free(pixelsImg);
+	free(backupOrg);
+}
+
+void doConvolution3(Image *image, int kernelSize, int kernel[kernelSize][kernelSize], int kernelScale, bool filter) {
+
+	pixel* pixelsImg = malloc(m*n*sizeof(pixel));
+	pixel* backupOrg = malloc(m*n*sizeof(pixel));
+
+	charsToPixels(image, pixelsImg);
+	copyPixels(pixelsImg, backupOrg);
+
+	smooth(m, backupOrg, pixelsImg, kernelSize, kernel, kernelScale, filter);
 
 	pixelsToChars(pixelsImg, image);
 
@@ -370,25 +478,25 @@ void myfunction(Image *image, char* srcImgpName, char* blurRsltImgName, char* sh
 
 	if (flag == '1') {	
 		// blur image
-		doConvolution(image, 3, blurKernel, 9, false);
+		doConvolution1(image, 3, blurKernel, 9, false);
 
 		// write result image to file
 		writeBMP(image, srcImgpName, blurRsltImgName);	
 
 		// sharpen the resulting image
-		doConvolution(image, 3, sharpKernel, 1, false);
+		doConvolution2(image, 3, sharpKernel, 1, false);
 		
 		// write result image to file
 		writeBMP(image, srcImgpName, sharpRsltImgName);	
 	} else {
 		// apply extermum filtered kernel to blur image
-		doConvolution(image, 3, blurKernel, 7, true);
+		doConvolution3(image, 3, blurKernel, 7, true);
 
 		// write result image to file
 		writeBMP(image, srcImgpName, filteredBlurRsltImgName);
 
 		// sharpen the resulting image
-		doConvolution(image, 3, sharpKernel, 1, false);
+		doConvolution3(image, 3, sharpKernel, 1, false);
 
 		// write result image to file
 		writeBMP(image, srcImgpName, filteredSharpRsltImgName);	
