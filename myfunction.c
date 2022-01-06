@@ -152,72 +152,284 @@ void smooth(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[kernelSi
 }
 
 
-void smoothNoFilter(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[kernelSize][kernelSize], int kernelScale) {
+void smoothNoFilter(int pdim, char *src, char *dst) {
 	// int div = dim % 3;
 	// int jump = 2*dim;
 	// create 9 pointers representing the template to work on
-	pixel* a = src;
-	pixel* x = src + 1;
-	pixel* u = src + 2;
-	pixel* b = src + dim;
-	pixel* y = src + dim + 1;
-	pixel* v = src + dim + 2;
-	pixel* c = src + 2*dim;
-	pixel* z = src + 2*dim + 1;
-	pixel* w = src + 2*dim + 2;
+	// the pdim is in pixel dimentions
+	int dim = pdim * 3;
+	char* ar = src;
+	char* ag = src + 1;
+	char* ab = src + 2;
 
-	pixel* dstPixel = dst + dim + 1;
+	char* br = src + dim;
+	char* bg = src + dim + 1;
+	char* bb = src + dim + 2;
+
+	char* cr = src + dim + dim;
+	char* cg = src + dim + dim + 1;
+	char* cb = src + dim + dim + 2;
+
+	char* xr = src + 3;
+	char* xg = src + 4;
+	char* xb = src + 5;
+
+	char* yr = src + dim + 3;
+	char* yg = src + dim + 4;
+	char* yb = src + dim + 5;
+
+	char* zr = src + dim + dim + 3;
+	char* zg = src + dim + dim + 4;
+	char* zb = src + dim + dim + 5;
+	
+	char* ur = src + 3;
+	char* ug = src + 4;
+	char* ub = src + 5;
+
+	char* vr = src + dim + 3;
+	char* vg = src + dim + 4;
+	char* vb = src + dim + 5;
+
+	char* wr = src + dim + dim + 3;
+	char* wg = src + dim + dim + 4;
+	char* wb = src + dim + dim + 5;
+
+	char* destr = dst + dim + 3;
+	char* destg = dst + dim + 4;
+	char* destb = dst + dim + 5;
+
 
 	//pixel ka, kb, kc, kx, ky, kz, ku, kv, kw;
 	register int redSum, greenSum, blueSum;
 	unsigned int i, j;
-	for (i = 1; i < dim - 1; i++) {
-		for ( j = 1; j < dim - 1; j++) {
+	for (i = 1; i < pdim - 1; i++) {
+		for ( j = 1; j < pdim - 1; j++) {
 			//printf("i = %d, j = %d\n", i ,j);
 			redSum = 0;
 			greenSum = 0;
 			blueSum = 0;
-			// ka =  *a;
-			// kx =  *x;
-			// ku =  *u;
-			// kb =  *b;
-			// ky =  *y;
-			// kv =  *v;
-			// kc =  *c;
-			// kz =  *z;
-			// kw =  *w;
 
 			// the equivalent of applykernel multiplication
-			redSum   += a->red   + x->red   + u->red;
-			greenSum += a->green + x->green + u->green;
-			blueSum  += a->blue  + x->blue  + u->blue;
+			redSum   += *ar + *xr + *ur;
+			greenSum += *ag + *xg + *ug;
+			blueSum  += *ab + *xb + *ub;
 
-			redSum   += b->red   + y->red   + v->red;
-			greenSum += b->green + y->green + v->green;
-			blueSum  += b->blue  + y->blue  + v->blue;
+			redSum   += *br + *yr + *vr;
+			greenSum += *bg + *yg + *vg;
+			blueSum  += *bb + *yb + *vb;
 
-			redSum   += c->red   + z->red   + w->red;
-			greenSum += c->green + z->green + w->green;
-			blueSum  += c->blue  + z->blue  + w->blue;
+			redSum   += *cr + *zr + *wr;
+			greenSum += *cg + *zg + *wg;
+			blueSum  += *cb + *zb + *wb;
 			
-			
-			dstPixel->red   = redSum / kernelScale;
-			dstPixel->green = greenSum / kernelScale;
-			dstPixel->blue  = blueSum / kernelScale;
-			// moving on to the next pixel
-			++dstPixel;
-			++a;
-			++b;
-			++c;
-			++x;
-			++y;
-			++z;
-			++u;
-			++v;
-			++w;
+			// put the values in the target 'pixel'
+			*destr = redSum / 9;
+			*destg = greenSum / 9;
+			*destb = blueSum / 9;
+			// moving on to the next 'pixel'
+			destr += 3;
+			destg += 3;
+			destb += 3;
+			ar += 3;
+			ag += 3;
+			ab += 3;
+			br += 3;
+			bg += 3;
+			bb += 3;
+			cr += 3;
+			cg += 3;
+			cb += 3;
+			xr += 3;
+			xg += 3;
+			xb += 3;
+			yr += 3;
+			yg += 3;
+			yb += 3;
+			zr += 3;
+			zg += 3;
+			zb += 3;
+			ur += 3;
+			ug += 3;
+			ub += 3;
+			vr += 3;
+			vg += 3;
+			vb += 3;
+			wr += 3;
+			wg += 3;
+			wb += 3;
 		}
+		// move to next row
+		destr += 9;
+		destg += 9;
+		destb += 9;
+		ar += 9;
+		ag += 9;
+		ab += 9;
+		br += 9;
+		bg += 9;
+		bb += 9;
+		cr += 9;
+		cg += 9;
+		cb += 9;
+		xr += 9;
+		xg += 9;
+		xb += 9;
+		yr += 9;
+		yg += 9;
+		yb += 9;
+		zr += 9;
+		zg += 9;
+		zb += 9;
+		ur += 9;
+		ug += 9;
+		ub += 9;
+		vr += 9;
+		vg += 9;
+		vb += 9;
+		wr += 9;
+		wg += 9;
+		wb += 9;
 	}
 	
+}
+
+void sharpNofilterChars(int pdim, char* src, char* dst) {
+	int dim = pdim * 3;
+	char* ar = src;
+	char* ag = src + 1;
+	char* ab = src + 2;
+
+	char* br = src + dim;
+	char* bg = src + dim + 1;
+	char* bb = src + dim + 2;
+
+	char* cr = src + dim + dim;
+	char* cg = src + dim + dim + 1;
+	char* cb = src + dim + dim + 2;
+
+	char* xr = src + 3;
+	char* xg = src + 4;
+	char* xb = src + 5;
+
+	char* yr = src + dim + 3;
+	char* yg = src + dim + 4;
+	char* yb = src + dim + 5;
+
+	char* zr = src + dim + dim + 3;
+	char* zg = src + dim + dim + 4;
+	char* zb = src + dim + dim + 5;
+	
+	char* ur = src + 3;
+	char* ug = src + 4;
+	char* ub = src + 5;
+
+	char* vr = src + dim + 3;
+	char* vg = src + dim + 4;
+	char* vb = src + dim + 5;
+
+	char* wr = src + dim + dim + 3;
+	char* wg = src + dim + dim + 4;
+	char* wb = src + dim + dim + 5;
+
+	char* destr = dst + dim + 3;
+	char* destg = dst + dim + 4;
+	char* destb = dst + dim + 5;
+
+
+	//pixel ka, kb, kc, kx, ky, kz, ku, kv, kw;
+	register int redSum, greenSum, blueSum;
+	unsigned int i, j;
+	for (i = 1; i < pdim - 1; i++) {
+		for ( j = 1; j < pdim - 1; j++) {
+			//printf("i = %d, j = %d\n", i ,j);
+			redSum = 0;
+			greenSum = 0;
+			blueSum = 0;
+
+			// the equivalent of applykernel multiplication
+			redSum   -= *ar + *xr + *ur;
+			greenSum -= *ag + *xg + *ug;
+			blueSum  -= *ab + *xb + *ub;
+
+			redSum   -= *br + *vr;
+			redSum	 += 9   * (*yr);
+			greenSum -= *bg + *vg;
+			greenSum += 9   * (*yg);
+			blueSum  -= *bb + *vb;
+			blueSum  += 9   * (*yb);
+
+			redSum   -= *cr + *zr + *wr;
+			greenSum -= *cg + *zg + *wg;
+			blueSum  -= *cb + *zb + *wb;
+			
+			// put the values in the target 'pixel'
+			*destr   =  (unsigned char)MIN(MAX(redSum,0), 255);
+			*destg   =  (unsigned char)MIN(MAX(greenSum,0), 255);
+			*destb   =  (unsigned char)MIN(MAX(blueSum,0), 255);
+			// moving on to the next 'pixel'
+			destr += 3;
+			destg += 3;
+			destb += 3;
+			ar += 3;
+			ag += 3;
+			ab += 3;
+			br += 3;
+			bg += 3;
+			bb += 3;
+			cr += 3;
+			cg += 3;
+			cb += 3;
+			xr += 3;
+			xg += 3;
+			xb += 3;
+			yr += 3;
+			yg += 3;
+			yb += 3;
+			zr += 3;
+			zg += 3;
+			zb += 3;
+			ur += 3;
+			ug += 3;
+			ub += 3;
+			vr += 3;
+			vg += 3;
+			vb += 3;
+			wr += 3;
+			wg += 3;
+			wb += 3;
+		}
+		// move to next row
+		destr += 9;
+		destg += 9;
+		destb += 9;
+		ar += 9;
+		ag += 9;
+		ab += 9;
+		br += 9;
+		bg += 9;
+		bb += 9;
+		cr += 9;
+		cg += 9;
+		cb += 9;
+		xr += 9;
+		xg += 9;
+		xb += 9;
+		yr += 9;
+		yg += 9;
+		yb += 9;
+		zr += 9;
+		zg += 9;
+		zb += 9;
+		ur += 9;
+		ug += 9;
+		ub += 9;
+		vr += 9;
+		vg += 9;
+		vb += 9;
+		wr += 9;
+		wg += 9;
+		wb += 9;
+	}
 }
 
 void sharpNoFilter(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[kernelSize][kernelSize], int kernelScale) {
@@ -245,15 +457,6 @@ void sharpNoFilter(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[k
 			redSum = 0;
 			greenSum = 0;
 			blueSum = 0;
-			// ka =  *a;
-			// kx =  *x;
-			// ku =  *u;
-			// kb =  *b;
-			// ky =  *y;
-			// kv =  *v;
-			// kc =  *c;
-			// kz =  *z;
-			// kw =  *w;
 
 			// the equivalent of applykernel multiplication for kernel {{-1,-1,-1}, {-1, 9, -1}, {-1, -1 ,-1}}
 			redSum   -= a->red   + x->red   + u->red;
@@ -332,44 +535,52 @@ void copyPixels(pixel* src, pixel* dst) {
 
 void doConvolution1(Image *image, int kernelSize, int kernel[kernelSize][kernelSize], int kernelScale, bool filter) {
 
-	pixel* pixelsImg = malloc(m*n*sizeof(pixel));
-	pixel* backupOrg = malloc(m*n*sizeof(pixel));
+	//pixel* pixelsImg = malloc(m*n*sizeof(pixel));
+	//pixel* backupOrg = malloc(m*n*sizeof(pixel));
 
-	charsToPixels(image, pixelsImg);
-	copyPixels(pixelsImg, backupOrg);
+	//charsToPixels(image, pixelsImg);
+	//copyPixels(pixelsImg, backupOrg);
+
+	char* newImage = malloc(9*m*n*sizeof(unsigned char));
+
 	if (filter)
 	{
-		smooth(m, backupOrg, pixelsImg, kernelSize, kernel, kernelScale, filter);
+		//smooth(m, backupOrg, pixelsImg, kernelSize, kernel, kernelScale, filter);
 	} else {
-		smoothNoFilter(m, backupOrg, pixelsImg, kernelSize, kernel, kernelScale);
+		smoothNoFilter(m, image->data, newImage);
+		image->data = newImage;
 	}
 	
 
-	pixelsToChars(pixelsImg, image);
+	//pixelsToChars(pixelsImg, image);
 
-	free(pixelsImg);
-	free(backupOrg);
+	//free(pixelsImg);
+	//free(backupOrg);
 }
 
 void doConvolution2(Image *image, int kernelSize, int kernel[kernelSize][kernelSize], int kernelScale, bool filter) {
 
-	pixel* pixelsImg = malloc(m*n*sizeof(pixel));
-	pixel* backupOrg = malloc(m*n*sizeof(pixel));
+	//pixel* pixelsImg = malloc(m*n*sizeof(pixel));
+	//pixel* backupOrg = malloc(m*n*sizeof(pixel));
 
-	charsToPixels(image, pixelsImg);
-	copyPixels(pixelsImg, backupOrg);
+	char* newImage = malloc(9*m*n*sizeof(unsigned char));
+	
+	//charsToPixels(image, pixelsImg);
+	//copyPixels(pixelsImg, backupOrg);
 	if (filter)
 	{
-		smooth(m, backupOrg, pixelsImg, kernelSize, kernel, kernelScale, filter);
+		//smooth(m, backupOrg, pixelsImg, kernelSize, kernel, kernelScale, filter);
 	} else {
-		sharpNoFilter(m, backupOrg, pixelsImg, kernelSize, kernel, kernelScale);
+		sharpNofilterChars(m, image->data, newImage);
+		image->data = newImage;
 	}
 	
 
-	pixelsToChars(pixelsImg, image);
+	//pixelsToChars(pixelsImg, image);
 
-	free(pixelsImg);
-	free(backupOrg);
+	//free(pixelsImg);
+	//free(backupOrg);
+	//free(newImage);
 }
 
 void doConvolution3(Image *image, int kernelSize, int kernel[kernelSize][kernelSize], int kernelScale, bool filter) {
