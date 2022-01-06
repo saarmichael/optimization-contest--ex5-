@@ -152,7 +152,7 @@ void smooth(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[kernelSi
 }
 
 
-void smoothNoFilter(int pdim, char *src, char *dst) {
+void smoothNoFilter(int pdim, unsigned char *src, char *dst) {
 	// int div = dim % 3;
 	// int jump = 2*dim;
 	// create 9 pointers representing the template to work on
@@ -182,25 +182,27 @@ void smoothNoFilter(int pdim, char *src, char *dst) {
 	char* zg = src + dim + dim + 4;
 	char* zb = src + dim + dim + 5;
 	
-	char* ur = src + 3;
-	char* ug = src + 4;
-	char* ub = src + 5;
+	char* ur = src + 6;
+	char* ug = src + 7;
+	char* ub = src + 8;
 
-	char* vr = src + dim + 3;
-	char* vg = src + dim + 4;
-	char* vb = src + dim + 5;
+	char* vr = src + dim + 6;
+	char* vg = src + dim + 7;
+	char* vb = src + dim + 8;
 
-	char* wr = src + dim + dim + 3;
-	char* wg = src + dim + dim + 4;
-	char* wb = src + dim + dim + 5;
+	char* wr = src + dim + dim + 6;
+	char* wg = src + dim + dim + 7;
+	char* wb = src + dim + dim + 8;
 
 	char* destr = dst + dim + 3;
 	char* destg = dst + dim + 4;
 	char* destb = dst + dim + 5;
-
+	printf("pdim: %d, dim: %d\n", pdim, dim);
 
 	//pixel ka, kb, kc, kx, ky, kz, ku, kv, kw;
 	register int redSum, greenSum, blueSum;
+	int counti = 0;
+	int countj = 0;
 	unsigned int i, j;
 	for (i = 1; i < pdim - 1; i++) {
 		for ( j = 1; j < pdim - 1; j++) {
@@ -210,18 +212,23 @@ void smoothNoFilter(int pdim, char *src, char *dst) {
 			blueSum = 0;
 
 			// the equivalent of applykernel multiplication
-			redSum   += *ar + *xr + *ur;
-			greenSum += *ag + *xg + *ug;
-			blueSum  += *ab + *xb + *ub;
+			redSum   += (unsigned char)*ar + (unsigned char)*xr + (unsigned char)*ur;
+			greenSum += (unsigned char)*ag + (unsigned char)*xg + (unsigned char)*ug;
+			blueSum  += (unsigned char)*ab + (unsigned char)*xb + (unsigned char)*ub;
 
-			redSum   += *br + *yr + *vr;
-			greenSum += *bg + *yg + *vg;
-			blueSum  += *bb + *yb + *vb;
+			redSum   += (unsigned char)*br + (unsigned char)*yr + (unsigned char)*vr;
+			greenSum += (unsigned char)*bg + (unsigned char)*yg + (unsigned char)*vg;
+			blueSum  += (unsigned char)*bb + (unsigned char)*yb + (unsigned char)*vb;
 
-			redSum   += *cr + *zr + *wr;
-			greenSum += *cg + *zg + *wg;
-			blueSum  += *cb + *zb + *wb;
+			redSum   += (unsigned char)*cr + (unsigned char)*zr + (unsigned char)*wr;
+			greenSum += (unsigned char)*cg + (unsigned char)*zg + (unsigned char)*wg;
+			blueSum  += (unsigned char)*cb + (unsigned char)*zb + (unsigned char)*wb;
 			
+			if ((i >= 240 && i <= 250) && (j >=240 && j < 260)) {
+				printf("(%d, %d)\nr:%d g:%d b: %d\n", i, j, redSum, greenSum, blueSum);
+			}
+			
+
 			// put the values in the target 'pixel'
 			*destr = redSum / 9;
 			*destg = greenSum / 9;
@@ -257,6 +264,7 @@ void smoothNoFilter(int pdim, char *src, char *dst) {
 			wr += 3;
 			wg += 3;
 			wb += 3;
+			countj++;
 		}
 		// move to next row
 		destr += 9;
@@ -289,11 +297,12 @@ void smoothNoFilter(int pdim, char *src, char *dst) {
 		wr += 9;
 		wg += 9;
 		wb += 9;
+		counti++;
 	}
-	
+	// printf("blur count: i = %d, j = %d\n", counti, countj / counti);
 }
 
-void sharpNofilterChars(int pdim, char* src, char* dst) {
+void sharpNofilterChars(int pdim, unsigned char* src, char* dst) {
 	int dim = pdim * 3;
 	char* ar = src;
 	char* ag = src + 1;
@@ -541,7 +550,7 @@ void doConvolution1(Image *image, int kernelSize, int kernel[kernelSize][kernelS
 	//charsToPixels(image, pixelsImg);
 	//copyPixels(pixelsImg, backupOrg);
 
-	char* newImage = malloc(9*m*n*sizeof(unsigned char));
+	char* newImage = (unsigned char*)malloc(9*m*n*sizeof(unsigned char));
 
 	if (filter)
 	{
@@ -563,7 +572,7 @@ void doConvolution2(Image *image, int kernelSize, int kernel[kernelSize][kernelS
 	//pixel* pixelsImg = malloc(m*n*sizeof(pixel));
 	//pixel* backupOrg = malloc(m*n*sizeof(pixel));
 
-	char* newImage = malloc(9*m*n*sizeof(unsigned char));
+	char* newImage = (unsigned char*)malloc(9*m*n*sizeof(unsigned char));
 	
 	//charsToPixels(image, pixelsImg);
 	//copyPixels(pixelsImg, backupOrg);
