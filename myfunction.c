@@ -289,7 +289,44 @@ void sharpNoFilter(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[k
 }
 
 void charsToPixelsUnrolled(Image *charsImg, pixel* pixels) {
-	pixel* p1 = pixel;
+	pixel* p1 = pixels;
+	char* c1r = charsImg->data;
+	char* c1g = charsImg->data + 1;
+	char* c1b = charsImg->data + 2;
+	pixel* p2 = pixels + m*sizeof(pixel);
+	char* c2r = charsImg->data + 3*m*sizeof(pixel);
+	char* c2g = charsImg->data + 3*m*sizeof(pixel) + 1;
+	char* c2b = charsImg->data + 3*m*sizeof(pixel) + 2;
+
+	int i, j;
+	for (i = 0; i < m; i+=2) {
+		for (j = 0; j < n; j++ ) {
+			p1->red = *c1r;
+			p1->green = *c1g;
+			p1->blue = *c1b;
+			p2->red = *c2r;
+			p2->green = *c2g;
+			p2->blue = *c2b;
+			// move on
+			p1++;
+			p2++;
+			c1r = c1r + 3;
+			c1g = c1g + 3;
+			c1b = c1b + 3;
+			c2r = c2r + 3;
+			c2g = c2g + 3;
+			c2b = c2b + 3;
+		}
+		p1 = p1 + m;
+		p2 = p2 + m;
+		c1r = c1r + 3*m;
+		c1g = c1g + 3*m;
+		c1b = c1b + 3*m;
+		c2r = c2r + 3*m;
+		c2g = c2g + 3*m;
+		c2b = c2b + 3*m;
+	}
+	
 	
 }
 
@@ -339,7 +376,7 @@ void doConvolution1(Image *image, int kernelSize, int kernel[kernelSize][kernelS
 	pixel* pixelsImg = malloc(m*n*sizeof(pixel));
 	pixel* backupOrg = malloc(m*n*sizeof(pixel));
 
-	charsToPixels(image, pixelsImg);
+	charsToPixelsUnrolled(image, pixelsImg);
 	copyPixels(pixelsImg, backupOrg);
 	if (filter)
 	{
@@ -360,7 +397,7 @@ void doConvolution2(Image *image, int kernelSize, int kernel[kernelSize][kernelS
 	pixel* pixelsImg = malloc(m*n*sizeof(pixel));
 	pixel* backupOrg = malloc(m*n*sizeof(pixel));
 
-	charsToPixels(image, pixelsImg);
+	charsToPixelsUnrolled(image, pixelsImg);
 	copyPixels(pixelsImg, backupOrg);
 	if (filter)
 	{
