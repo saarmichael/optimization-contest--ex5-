@@ -288,6 +288,10 @@ void sharpNoFilter(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[k
 	
 }
 
+void charsToPixelsUnrolled(Image *charsImg, pixel* pixels) {
+	pixel* p1 = pixel;
+	
+}
 
 void charsToPixels(Image *charsImg, pixel* pixels) {
 
