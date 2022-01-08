@@ -1,4 +1,5 @@
 #include <stdbool.h> 
+#include <string.h>
 
 #define MIN(x,y) ((x<y)?x:y)
 #define MAX(x,y) ((x>y)?x:y)
@@ -153,11 +154,12 @@ void smooth(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[kernelSi
 
 
 void smoothNoFilter(int pdim, unsigned char *src, char *dst) {
-	// int div = dim % 3;
-	// int jump = 2*dim;
-	// create 9 pointers representing the template to work on
-	// the pdim is in pixel dimentions
 	int dim = pdim * 3;
+	// copy the first row of pixels to dst
+	memcpy(dst, src, dim);
+	// compy the last row of pixels to dst
+	memcpy(dst + ((pdim - 1)*dim), src + ((pdim - 1)*dim), dim);
+	
 	unsigned char* ar = src;
 	unsigned char* ag = src + 1;
 	unsigned char* ab = src + 2;
@@ -201,13 +203,13 @@ void smoothNoFilter(int pdim, unsigned char *src, char *dst) {
 
 	
 	register int redSum, greenSum, blueSum;
-	int counti = 0;
-	int countj = 0;
 	unsigned int i, j;
 	for (i = 1; i < pdim - 1; i++) {
+
 		destr = dst + dim*i + 3*sizeof(unsigned char);
 		destg = dst + dim*i + 4*sizeof(unsigned char);
 		destb = dst + dim*i + 5*sizeof(unsigned char);
+
 		ar = src + dim*(i-1);
 		ag = src + dim*(i-1) + 1*sizeof(unsigned char);
 		ab = src + dim*(i-1) + 2*sizeof(unsigned char);
@@ -235,8 +237,13 @@ void smoothNoFilter(int pdim, unsigned char *src, char *dst) {
 		wr = src + dim*(i+1) + 6*sizeof(unsigned char);
 		wg = src + dim*(i+1) + 7*sizeof(unsigned char);
 		wb = src + dim*(i+1) + 8*sizeof(unsigned char);
+
+		// copy the first pixel to dst
+		*(destr - 3) = *br;
+		*(destg - 3) = *bg;
+		*(destb - 3) = *bb;
+
 		for ( j = 1; j < pdim - 1; j++) {
-			//printf("i = %d, j = %d\n", i ,j);
 			redSum = 0;
 			greenSum = 0;
 			blueSum = 0;
@@ -253,12 +260,6 @@ void smoothNoFilter(int pdim, unsigned char *src, char *dst) {
 			redSum   += (int)*cr + (int)*zr + (int)*wr;
 			greenSum += (int)*cg + (int)*zg + (int)*wg;
 			blueSum  += (int)*cb + (int)*zb + (int)*wb;
-			
-			if ((i >= 240 && i <= 250) && (j >=240 && j < 260)) {
-				//printf("(%d, %d)\nr:%d g:%d b: %d\n", i, j, redSum, greenSum, blueSum);
-				//printf("(%d,%d)\na: r: %d, g: %d, b: %d\n", i,j ,(int)((unsigned char)*ar), (int)((unsigned char)*ag), (int)((unsigned char)*ab));
-				printf("(%d, %d)\nr:%d g:%d b:%d\n", i, j, (int)(*ar), (int)(*ag), (int)(*ab));
-			}
 			
 
 			// put the values in the target 'pixel'
@@ -296,40 +297,11 @@ void smoothNoFilter(int pdim, unsigned char *src, char *dst) {
 			wr += 3*sizeof(unsigned char);
 			wg += 3*sizeof(unsigned char);
 			wb += 3*sizeof(unsigned char);
-			countj++;
 		}
-		// move to next row
-		// destr += 9;
-		// destg += 9;
-		// destb += 9;
-		// ar += 9;
-		// ag += 9;
-		// ab += 9;
-		// br += 9;
-		// bg += 9;
-		// bb += 9;
-		// cr += 9;
-		// cg += 9;
-		// cb += 9;
-		// xr += 9;
-		// xg += 9;
-		// xb += 9;
-		// yr += 9;
-		// yg += 9;
-		// yb += 9;
-		// zr += 9;
-		// zg += 9;
-		// zb += 9;
-		// ur += 9;
-		// ug += 9;
-		// ub += 9;
-		// vr += 9;
-		// vg += 9;
-		// vb += 9;
-		// wr += 9;
-		// wg += 9;
-		// wb += 9;
-		counti++;
+		// copy the last pixel to dst
+		*(destr) = *(vr - 3);
+		*(destg) = *(vg - 3);
+		*(destb) = *(vb - 3);
 	}
 	// printf("blur count: i = %d, j = %d\n", counti, countj / counti);
 }
