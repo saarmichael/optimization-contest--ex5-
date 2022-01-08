@@ -499,7 +499,7 @@ void filterChars(int pdim, unsigned char *src, char *dst) {
 	
 	register int redSum, greenSum, blueSum;
 	register int sumA, sumB, sumC, sumX, sumY, sumZ, sumU, sumV, sumW, min, max;
-	unsigned char* maxPixel, minPixel;
+	unsigned char *maxPixel, *minPixel;
 	register int sumL, sumM, sumR;
 	unsigned int i, j;
 	for (i = 1; i < pdim - 1; i++) {
@@ -545,7 +545,8 @@ void filterChars(int pdim, unsigned char *src, char *dst) {
 			redSum = 0;
 			greenSum = 0;
 			blueSum = 0;
-
+			min = 766;
+			max = 0;
 			// sumA = 0; 
 			// sumB = 0; 
 			// sumC = 0; 
@@ -566,12 +567,40 @@ void filterChars(int pdim, unsigned char *src, char *dst) {
 			redSum   += (int)*ar + (int)*xr + (int)*ur;
 			greenSum += (int)*ag + (int)*xg + (int)*ug;
 			blueSum  += (int)*ab + (int)*xb + (int)*ub;
-			sumL = *ar + *ag + *ab;
-			sumM = *xr + *xg + *xb;
-			sumR = *ur + *ug + *ub;
+			sumL = (int)*ar + (int)*ag + (int)*ab;
+			sumM = (int)*xr + (int)*xg + (int)*xb;
+			sumR = (int)*ur + (int)*ug + (int)*ub;
+			if (sumL <= min) {
+				min = sumL;
+				minPixel = ar; 
+			}
+			if (sumL > max) {
+				max = sumL;
+				maxPixel = ar;
+			}
+			if (sumM <= min) {
+				min = sumM;
+				minPixel = xr; 
+			}
+			if (sumM > max) {
+				max = sumM;
+				maxPixel = xr;
+			}
+			if (sumR <= min) {
+				min = sumR;
+				minPixel = ur; 
+			}
+			if (sumR > max) {
+				max = sumR;
+				maxPixel = ur;
+			}
+			
+			
+			
 			// find min and max pixel
-			if (sumL > sumM) {
-				if (sumL > sumR) {
+			/*
+			if (sumL >= sumM) {
+				if (sumL >= sumR) {
 					max = sumL;
 					maxPixel = ar;
 					if (sumM < sumR) {
@@ -588,7 +617,7 @@ void filterChars(int pdim, unsigned char *src, char *dst) {
 					minPixel = xr;
 				}
 			} else {
-				if (sumM > sumR) {
+				if (sumM >= sumR) {
 					max = sumM;
 					maxPixel = xr;
 					if (sumL < sumR) {
@@ -605,30 +634,192 @@ void filterChars(int pdim, unsigned char *src, char *dst) {
 					minPixel = ar;
 				}				
 			}	
-
+*/
 			redSum   += (int)*br + (int)*yr + (int)*vr;
 			greenSum += (int)*bg + (int)*yg + (int)*vg;
 			blueSum  += (int)*bb + (int)*yb + (int)*vb;
-			sumL = *br + *bg + *bb;
-			sumM = *yr + *yg + *yb;
-			sumR = *vr + *vg + *vb;
-			max = MAX(MAX(max ,sumL), MAX(sumM, sumR));
-			min = MIN(MIN(max ,sumL), MIN(sumM, sumR));
+			sumL = (int)*br + (int)*bg + (int)*bb;
+			sumM = (int)*yr + (int)*yg + (int)*yb;
+			sumR = (int)*vr + (int)*vg + (int)*vb;
 
+			if (sumL <= min) {
+				min = sumL;
+				minPixel = br; 
+			}
+			if (sumL > max) {
+				max = sumL;
+				maxPixel = br;
+			}if (sumM <= min) {
+				min = sumM;
+				minPixel = yr; 
+			}
+			if (sumM > max) {
+				max = sumM;
+				maxPixel = yr;
+			}if (sumR <= min) {
+				min = sumR;
+				minPixel = vr; 
+			}
+			if (sumR > max) {
+				max = sumR;
+				maxPixel = vr;
+			}
+
+			/*
+			if (sumL >= sumM) {
+				if (sumL >= sumR) {
+					if (sumL > max) {
+						max = sumL;
+					    maxPixel = br;
+					}
+					if (sumM < sumR) {
+						if (sumM <= min) {
+							min = sumM;
+							minPixel = yr;
+						}
+					} else {
+						if (sumR <= min) {
+							min = sumR;
+							minPixel = vr;
+						}
+					}
+				} else {
+					if (sumR > max) {
+						max = sumR;
+						maxPixel = vr;
+					}
+					if (sumM <= min) {
+						min = sumM;
+						minPixel = yr;
+					}
+				}
+			} else {
+				if (sumM >= sumR) {
+					if (sumM > max) {
+						max = sumM;
+						maxPixel = yr;
+					}
+					if (sumL < sumR) {
+						if (sumL <= min) {
+							min = sumL;
+							minPixel = br;
+						}
+					} else {
+						if (sumR <= min) {
+							min = sumR;
+							minPixel = vr;
+						}
+					}					
+				} else {
+					if (sumR > max) {
+						max = sumR;
+						maxPixel = vr;
+					}
+					if (sumL <= min) {
+						min = sumL;
+						minPixel = br;
+					}
+				}				
+			}
+			*/
 			redSum   += (int)*cr + (int)*zr + (int)*wr;
 			greenSum += (int)*cg + (int)*zg + (int)*wg;
 			blueSum  += (int)*cb + (int)*zb + (int)*wb;
-			sumL = *cr + *cg + *cb;
-			sumM = *zr + *zg + *zb;
-			sumR = *wr + *wg + *wb;
-			max = MAX(MAX(max ,sumL), MAX(sumM, sumR));
-			min = MIN(MIN(max ,sumL), MIN(sumM, sumR));
-
+			sumL = (int)*cr + (int)*cg + (int)*cb;
+			sumM = (int)*zr + (int)*zg + (int)*zb;
+			sumR = (int)*wr + (int)*wg + (int)*wb;
+			if (sumL <= min) {
+				min = sumL;
+				minPixel = cr; 
+			}
+			if (sumL > max) {
+				max = sumL;
+				maxPixel = cr;
+			}if (sumM <= min) {
+				min = sumM;
+				minPixel = zr; 
+			}
+			if (sumM > max) {
+				max = sumM;
+				maxPixel = zr;
+			}if (sumR <= min) {
+				min = sumR;
+				minPixel = wr; 
+			}
+			if (sumR > max) {
+				max = sumR;
+				maxPixel = wr;
+			}
+			/*
+			if (sumL >= sumM) {
+				if (sumL >= sumR) {
+					if (sumL > max) {
+						max = sumL;
+					    maxPixel = cr;
+					}
+					if (sumM < sumR) {
+						if (sumM <= min) {
+							min = sumM;
+							minPixel = zr;
+						}
+					} else {
+						if (sumR <= min) {
+							min = sumR;
+							minPixel = wr;
+						}
+					}
+				} else {
+					if (sumR > max) {
+						max = sumR;
+						maxPixel = wr;
+					}
+					if (sumM <= min) {
+						min = sumM;
+						minPixel = zr;
+					}
+				}
+			} else {
+				if (sumM >= sumR) {
+					if (sumM > max) {
+						max = sumM;
+						maxPixel = zr;
+					}
+					if (sumL < sumR) {
+						if (sumL <= min) {
+							min = sumL;
+							minPixel = cr;
+						}
+					} else {
+						if (sumR <= min) {
+							min = sumR;
+							minPixel = wr;
+						}
+					}					
+				} else {
+					if (sumR > max) {
+						max = sumR;
+						maxPixel = wr;
+					}
+					if (sumL <= min) {
+						min = sumL;
+						minPixel = cr;
+					}
+				}				
+			}
+			*/
+			// subtract the value of max and min pixels
+			redSum   = redSum -(int)*(maxPixel++)   - (int)*(minPixel++);
+			greenSum = greenSum -(int)*(maxPixel++) - (int)*(minPixel++);
+			blueSum  = blueSum -(int)*(maxPixel)  - (int)*(minPixel);
 
 			// put the values in the target 'pixel'
-			*destr = (unsigned char)(redSum / 9);
-			*destg = (unsigned char)(greenSum / 9);
-			*destb = (unsigned char)(blueSum / 9);
+			redSum = (redSum / 7);
+			greenSum = (greenSum / 7);
+			blueSum = (blueSum / 7);
+			*destr = (unsigned char)(MIN(MAX(redSum, 0), 255));
+			*destg = (unsigned char)(MIN(MAX(greenSum, 0), 255));
+			*destb = (unsigned char)(MIN(MAX(blueSum, 0), 255));
+
 			// moving on to the next 'pixel'
 			destr += 3*sizeof(unsigned char);
 			destg += 3*sizeof(unsigned char);
@@ -828,7 +1019,7 @@ void doConvolution3(Image *image, int kernelSize, int kernel[kernelSize][kernelS
 	
 	//charsToPixels(image, pixelsImg);
 	//copyPixels(pixelsImg, backupOrg);
-	if (filter)
+	if (!filter)
 	{
 		//smooth(m, backupOrg, pixelsImg, kernelSize, kernel, kernelScale, filter);
 	} else {
@@ -857,8 +1048,8 @@ void doConvolution4(Image *image, int kernelSize, int kernel[kernelSize][kernelS
 	{
 		//smooth(m, backupOrg, pixelsImg, kernelSize, kernel, kernelScale, filter);
 	} else {
-		sharpFilterChars(m, image->data, newImage);
-		image->data = newImage;
+		// sharpFilterChars(m, image->data, newImage);
+		// image->data = newImage;
 	}
 	
 
@@ -921,7 +1112,7 @@ void myfunction(Image *image, char* srcImgpName, char* blurRsltImgName, char* sh
 		writeBMP(image, srcImgpName, filteredBlurRsltImgName);
 
 		// sharpen the resulting image
-		doConvolution4(image, 3, sharpKernel, 1, false);
+		doConvolution2(image, 3, sharpKernel, 1, false);
 
 		// write result image to file
 		writeBMP(image, srcImgpName, filteredSharpRsltImgName);	
