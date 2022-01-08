@@ -199,8 +199,6 @@ void smoothNoFilter(int pdim, unsigned char *src, char *dst) {
 	char* destr = dst + dim + 3;
 	char* destg = dst + dim + 4;
 	char* destb = dst + dim + 5;
-	printf("pdim: %d, dim: %d\n", pdim, dim);
-
 	
 	register int redSum, greenSum, blueSum;
 	unsigned int i, j;
@@ -303,147 +301,142 @@ void smoothNoFilter(int pdim, unsigned char *src, char *dst) {
 		*(destg) = *(vg - 3);
 		*(destb) = *(vb - 3);
 	}
-	// printf("blur count: i = %d, j = %d\n", counti, countj / counti);
 }
 
 void sharpNofilterChars(int pdim, unsigned char* src, char* dst) {
 	int dim = pdim * 3;
-	char* ar = src;
-	char* ag = src + 1;
-	char* ab = src + 2;
-
-	char* br = src + dim;
-	char* bg = src + dim + 1;
-	char* bb = src + dim + 2;
-
-	char* cr = src + dim + dim;
-	char* cg = src + dim + dim + 1;
-	char* cb = src + dim + dim + 2;
-
-	char* xr = src + 3;
-	char* xg = src + 4;
-	char* xb = src + 5;
-
-	char* yr = src + dim + 3;
-	char* yg = src + dim + 4;
-	char* yb = src + dim + 5;
-
-	char* zr = src + dim + dim + 3;
-	char* zg = src + dim + dim + 4;
-	char* zb = src + dim + dim + 5;
 	
-	char* ur = src + 6;
-	char* ug = src + 7;
-	char* ub = src + 8;
+	unsigned char* ar = src;
+	unsigned char* ag = src + 1;
+	unsigned char* ab = src + 2;
 
-	char* vr = src + dim + 6;
-	char* vg = src + dim + 7;
-	char* vb = src + dim + 8;
+	unsigned char* br = src + dim;
+	unsigned char* bg = src + dim + 1;
+	unsigned char* bb = src + dim + 2;
 
-	char* wr = src + dim + dim + 6;
-	char* wg = src + dim + dim + 7;
-	char* wb = src + dim + dim + 8;
+	unsigned char* cr = src + dim + dim;
+	unsigned char* cg = src + dim + dim + 1;
+	unsigned char* cb = src + dim + dim + 2;
+
+	unsigned char* xr = src + 3;
+	unsigned char* xg = src + 4;
+	unsigned char* xb = src + 5;
+
+	unsigned char* yr = src + dim + 3;
+	unsigned char* yg = src + dim + 4;
+	unsigned char* yb = src + dim + 5;
+
+	unsigned char* zr = src + dim + dim + 3;
+	unsigned char* zg = src + dim + dim + 4;
+	unsigned char* zb = src + dim + dim + 5;
+	
+	unsigned char* ur = src + 6;
+	unsigned char* ug = src + 7;
+	unsigned char* ub = src + 8;
+
+	unsigned char* vr = src + dim + 6;
+	unsigned char* vg = src + dim + 7;
+	unsigned char* vb = src + dim + 8;
+
+	unsigned char* wr = src + dim + dim + 6;
+	unsigned char* wg = src + dim + dim + 7;
+	unsigned char* wb = src + dim + dim + 8;
 
 	char* destr = dst + dim + 3;
 	char* destg = dst + dim + 4;
 	char* destb = dst + dim + 5;
-
-
-	//pixel ka, kb, kc, kx, ky, kz, ku, kv, kw;
+	
 	register int redSum, greenSum, blueSum;
 	unsigned int i, j;
 	for (i = 1; i < pdim - 1; i++) {
-		
+
+		destr = dst + dim*i + 3*sizeof(unsigned char);
+		destg = dst + dim*i + 4*sizeof(unsigned char);
+		destb = dst + dim*i + 5*sizeof(unsigned char);
+
+		ar = src + dim*(i-1);
+		ag = src + dim*(i-1) + 1*sizeof(unsigned char);
+		ab = src + dim*(i-1) + 2*sizeof(unsigned char);
+		br = src + dim*(i);
+		bg = src + dim*(i) + 1*sizeof(unsigned char);
+		bb = src + dim*(i) + 2*sizeof(unsigned char);
+		cr = src + dim*(i+1);
+		cg = src + dim*(i+1) + 1*sizeof(unsigned char);
+		cb = src + dim*(i+1) + 2*sizeof(unsigned char);
+		xr = src + dim*(i-1) + 3*sizeof(unsigned char);
+		xg = src + dim*(i-1) + 4*sizeof(unsigned char);
+		xb = src + dim*(i-1) + 5*sizeof(unsigned char);
+		yr = src + dim*(i) + 3*sizeof(unsigned char);
+		yg = src + dim*(i) + 4*sizeof(unsigned char);
+		yb = src + dim*(i) + 5*sizeof(unsigned char);
+		zr = src + dim*(i+1) + 3*sizeof(unsigned char);
+		zg = src + dim*(i+1) + 4*sizeof(unsigned char);
+		zb = src + dim*(i+1) + 5*sizeof(unsigned char);
+		ur = src + dim*(i-1) + 6*sizeof(unsigned char);
+		ug = src + dim*(i-1) + 7*sizeof(unsigned char);
+		ub = src + dim*(i-1) + 8*sizeof(unsigned char);
+		vr = src + dim*(i) + 6*sizeof(unsigned char);
+		vg = src + dim*(i) + 7*sizeof(unsigned char);
+		vb = src + dim*(i) + 8*sizeof(unsigned char);
+		wr = src + dim*(i+1) + 6*sizeof(unsigned char);
+		wg = src + dim*(i+1) + 7*sizeof(unsigned char);
+		wb = src + dim*(i+1) + 8*sizeof(unsigned char);
+
 		for ( j = 1; j < pdim - 1; j++) {
-			//printf("i = %d, j = %d\n", i ,j);
 			redSum = 0;
 			greenSum = 0;
 			blueSum = 0;
 
 			// the equivalent of applykernel multiplication
-			redSum   -= *ar + *xr + *ur;
-			greenSum -= *ag + *xg + *ug;
-			blueSum  -= *ab + *xb + *ub;
+			redSum   += (int)*ar + (int)*xr + (int)*ur;
+			greenSum += (int)*ag + (int)*xg + (int)*ug;
+			blueSum  += (int)*ab + (int)*xb + (int)*ub;
 
-			redSum   -= *br + *vr;
-			redSum	 += 9   * (*yr);
-			greenSum -= *bg + *vg;
-			greenSum += 9   * (*yg);
-			blueSum  -= *bb + *vb;
-			blueSum  += 9   * (*yb);
+			redSum   += (int)*br + (int)*yr + (int)*vr;
+			greenSum += (int)*bg + (int)*yg + (int)*vg;
+			blueSum  += (int)*bb + (int)*yb + (int)*vb;
 
-			redSum   -= *cr + *zr + *wr;
-			greenSum -= *cg + *zg + *wg;
-			blueSum  -= *cb + *zb + *wb;
+			redSum   += (int)*cr + (int)*zr + (int)*wr;
+			greenSum += (int)*cg + (int)*zg + (int)*wg;
+			blueSum  += (int)*cb + (int)*zb + (int)*wb;
 			
+
 			// put the values in the target 'pixel'
-			*destr   =  (unsigned char)MIN(MAX(redSum,0), 255);
-			*destg   =  (unsigned char)MIN(MAX(greenSum,0), 255);
-			*destb   =  (unsigned char)MIN(MAX(blueSum,0), 255);
+			*destr = (unsigned char)(redSum / 9);
+			*destg = (unsigned char)(greenSum / 9);
+			*destb = (unsigned char)(blueSum / 9);
 			// moving on to the next 'pixel'
-			destr += 3;
-			destg += 3;
-			destb += 3;
-			ar += 3;
-			ag += 3;
-			ab += 3;
-			br += 3;
-			bg += 3;
-			bb += 3;
-			cr += 3;
-			cg += 3;
-			cb += 3;
-			xr += 3;
-			xg += 3;
-			xb += 3;
-			yr += 3;
-			yg += 3;
-			yb += 3;
-			zr += 3;
-			zg += 3;
-			zb += 3;
-			ur += 3;
-			ug += 3;
-			ub += 3;
-			vr += 3;
-			vg += 3;
-			vb += 3;
-			wr += 3;
-			wg += 3;
-			wb += 3;
+			destr += 3*sizeof(unsigned char);
+			destg += 3*sizeof(unsigned char);
+			destb += 3*sizeof(unsigned char);
+			ar += 3*sizeof(unsigned char);
+			ag += 3*sizeof(unsigned char);
+			ab += 3*sizeof(unsigned char);
+			br += 3*sizeof(unsigned char);
+			bg += 3*sizeof(unsigned char);
+			bb += 3*sizeof(unsigned char);
+			cr += 3*sizeof(unsigned char);
+			cg += 3*sizeof(unsigned char);
+			cb += 3*sizeof(unsigned char);
+			xr += 3*sizeof(unsigned char);
+			xg += 3*sizeof(unsigned char);
+			xb += 3*sizeof(unsigned char);
+			yr += 3*sizeof(unsigned char);
+			yg += 3*sizeof(unsigned char);
+			yb += 3*sizeof(unsigned char);
+			zr += 3*sizeof(unsigned char);
+			zg += 3*sizeof(unsigned char);
+			zb += 3*sizeof(unsigned char);
+			ur += 3*sizeof(unsigned char);
+			ug += 3*sizeof(unsigned char);
+			ub += 3*sizeof(unsigned char);
+			vr += 3*sizeof(unsigned char);
+			vg += 3*sizeof(unsigned char);
+			vb += 3*sizeof(unsigned char);
+			wr += 3*sizeof(unsigned char);
+			wg += 3*sizeof(unsigned char);
+			wb += 3*sizeof(unsigned char);
 		}
-		// move to next row
-		
-		destr += 9;
-		destg += 9;
-		destb += 9;
-		ar += 9;
-		ag += 9;
-		ab += 9;
-		br += 9;
-		bg += 9;
-		bb += 9;
-		cr += 9;
-		cg += 9;
-		cb += 9;
-		xr += 9;
-		xg += 9;
-		xb += 9;
-		yr += 9;
-		yg += 9;
-		yb += 9;
-		zr += 9;
-		zg += 9;
-		zb += 9;
-		ur += 9;
-		ug += 9;
-		ub += 9;
-		vr += 9;
-		vg += 9;
-		vb += 9;
-		wr += 9;
-		wg += 9;
-		wb += 9;
 	}
 }
 
