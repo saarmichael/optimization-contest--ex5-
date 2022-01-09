@@ -5,7 +5,8 @@
 #define MAX(x,y) ((x>y)?x:y)
 
 
-void smoothNoFilter(int pdim, unsigned char *src, char *dst) {
+void smoothNoFilter(unsigned int pdim, unsigned char *src, char *dst) {
+	
 	int dim = pdim * 3;
 	// copy the first row of pixels to dst
 	memcpy(dst, src, dim);
@@ -13,165 +14,218 @@ void smoothNoFilter(int pdim, unsigned char *src, char *dst) {
 	memcpy(dst + ((pdim - 1)*dim), src + ((pdim - 1)*dim), dim);
 	
 	register unsigned char* a = src;
-	// unsigned char* ag = src + 1;
-	// unsigned char* ab = src + 2;
-
 	register unsigned char* b = src + dim;
-	// unsigned char* bg = src + dim + 1;
-	// unsigned char* bb = src + dim + 2;
-
 	register unsigned char* c = src + dim + dim;
-	// unsigned char* cg = src + dim + dim + 1;
-	// unsigned char* cb = src + dim + dim + 2;
-
 	register unsigned char* x = src + 3;
-	// unsigned char* xg = src + 4;
-	// unsigned char* xb = src + 5;
-
 	register unsigned char* y = src + dim + 3;
-	// unsigned char* yg = src + dim + 4;
-	// unsigned char* yb = src + dim + 5;
-
 	register unsigned char* z = src + dim + dim + 3;
-	// unsigned char* zg = src + dim + dim + 4;
-	// unsigned char* zb = src + dim + dim + 5;
-	
 	register unsigned char* u = src + 6;
-	// unsigned char* ug = src + 7;
-	// unsigned char* ub = src + 8;
-
 	register unsigned char* v = src + dim + 6;
-	// unsigned char* vg = src + dim + 7;
-	// unsigned char* vb = src + dim + 8;
-
 	register unsigned char* w = src + dim + dim + 6;
-	// unsigned char* wg = src + dim + dim + 7;
-	// unsigned char* wb = src + dim + dim + 8;
-
 	char* destr = dst + dim + 3;
 	char* destg = dst + dim + 4;
 	char* destb = dst + dim + 5;
-	
-	register int redSum, greenSum, blueSum;
+	register int redSum1, greenSum1, blueSum1, redSum2, greenSum2, blueSum2;
 	unsigned int i, j;
-	for (i = 1; i < pdim - 1; i++) {
+	// for the even case:
+	if (pdim % 2  == 0) {
+		
+		for (i = 1; i < pdim - 1; i++) {
 
-		destr = dst + dim*i + 3*sizeof(unsigned char);
-		destg = dst + dim*i + 4*sizeof(unsigned char);
-		destb = dst + dim*i + 5*sizeof(unsigned char);
+			destr = dst + dim*i + 3*sizeof(unsigned char);
+			destg = dst + dim*i + 4*sizeof(unsigned char);
+			destb = dst + dim*i + 5*sizeof(unsigned char);
 
-		a = src + dim*(i-1);
-		// ag = src + dim*(i-1) + 1*sizeof(unsigned char);
-		// ab = src + dim*(i-1) + 2*sizeof(unsigned char);
-		b = src + dim*(i);
-		// bg = src + dim*(i) + 1*sizeof(unsigned char);
-		// bb = src + dim*(i) + 2*sizeof(unsigned char);
-		c = src + dim*(i+1);
-		// cg = src + dim*(i+1) + 1*sizeof(unsigned char);
-		// cb = src + dim*(i+1) + 2*sizeof(unsigned char);
-		x = src + dim*(i-1) + 3*sizeof(unsigned char);
-		// xg = src + dim*(i-1) + 4*sizeof(unsigned char);
-		// xb = src + dim*(i-1) + 5*sizeof(unsigned char);
-		y = src + dim*(i) + 3*sizeof(unsigned char);
-		// yg = src + dim*(i) + 4*sizeof(unsigned char);
-		// yb = src + dim*(i) + 5*sizeof(unsigned char);
-		z = src + dim*(i+1) + 3*sizeof(unsigned char);
-		// zg = src + dim*(i+1) + 4*sizeof(unsigned char);
-		// zb = src + dim*(i+1) + 5*sizeof(unsigned char);
-		u = src + dim*(i-1) + 6*sizeof(unsigned char);
-		// ug = src + dim*(i-1) + 7*sizeof(unsigned char);
-		// ub = src + dim*(i-1) + 8*sizeof(unsigned char);
-		v = src + dim*(i) + 6*sizeof(unsigned char);
-		// vg = src + dim*(i) + 7*sizeof(unsigned char);
-		// vb = src + dim*(i) + 8*sizeof(unsigned char);
-		w = src + dim*(i+1) + 6*sizeof(unsigned char);
-		// wg = src + dim*(i+1) + 7*sizeof(unsigned char);
-		// wb = src + dim*(i+1) + 8*sizeof(unsigned char);
+			a = src + dim*(i-1);
+			b = src + dim*(i);
+			c = src + dim*(i+1);
+			x = src + dim*(i-1) + 3*sizeof(unsigned char);
+			y = src + dim*(i) + 3*sizeof(unsigned char);
+			z = src + dim*(i+1) + 3*sizeof(unsigned char);
+			u = src + dim*(i-1) + 6*sizeof(unsigned char);
+			v = src + dim*(i) + 6*sizeof(unsigned char);
+			w = src + dim*(i+1) + 6*sizeof(unsigned char);
 
-		// copy the first pixel to dst
-		*(destr - 3) = *b;
-		*(destg - 3) = *(b + 1);
-		*(destb - 3) = *(b + 2);
+			// copy the first pixel to dst
+			*(destr - 3) = *b;
+			*(destg - 3) = *(b + 1);
+			*(destb - 3) = *(b + 2);
 
-		for ( j = 1; j < pdim - 1; j++) {
-			redSum = 0;
-			greenSum = 0;
-			blueSum = 0;
+			for ( j = 1; j < pdim - 1; j+=2) {
+				redSum1 = 0;
+				greenSum1 = 0;
+				blueSum1 = 0;
+				redSum2 = 0;
+				greenSum2 = 0;
+				blueSum2 = 0;
 
-			// the equivalent of applykernel multiplication
-			// redSum   += (int)*(a++) + (int)*(x++) + (int)*(u++);
-			// greenSum += (int)*(a++) + (int)*(x++) + (int)*(u++);
-			// blueSum  += (int)*(a++) + (int)*(x++) + (int)*(u++);
+				redSum1 += (int)*(x) + (int)*(u);
+				x++; u++;
+				greenSum1 += (int)*(x) + (int)*(u);
+				x++; u++;
+				blueSum1 += (int)*(x) + (int)*(u);
+				x++; u++;
+				
 
-			// redSum   += (int)*(b++) + (int)*(y++) + (int)*(v++);
-			// greenSum += (int)*(b++) + (int)*(y++) + (int)*(v++);
-			// blueSum  += (int)*(b++) + (int)*(y++) + (int)*(v++);
+				redSum1 += (int)*(y) + (int)*(v);
+				y++; v++;
+				greenSum1 += (int)*(y) + (int)*(v);
+				y++; v++;
+				blueSum1 += (int)*(y) + (int)*(v);
+				y++, v++;
 
-			// redSum   += (int)*(c++) + (int)*(z++) + (int)*(w++);
-			// greenSum += (int)*(c++) + (int)*(z++) + (int)*(w++);
-			// blueSum  += (int)*(c++) + (int)*(z++) + (int)*(w++);
+				redSum1 += (int)*(z) + (int)*(w);
+				z++; w++;
+				greenSum1 += (int)*(z) + (int)*(w);
+				z++; w++;
+				blueSum1 += (int)*(z) + (int)*(w);
+				z++; w++;
+				
+				redSum2 += redSum1 + (int)*u + (int)*v + (int)*w;
+				u++; v++; w++;
+				greenSum2 += greenSum1 + (int)*u + (int)*v + (int)*w;
+				u++; v++; w++;
+				blueSum2 += blueSum1 + (int)*u + (int)*v + (int)*w;
+				u++; v++; w++;
+				
+				redSum1 += (int)*a + (int)*b + (int)*c;
+				a++; b++; c++;
+				greenSum1 += (int)*a + (int)*b + (int)*c;
+				a++; b++; c++;
+				blueSum1 += (int)*a + (int)*b + (int)*c;
+				
 
-			redSum   += (int)*(a) + (int)*(x) + (int)*(u);
-			a++; x++; u++;
-			greenSum += (int)*(a) + (int)*(x) + (int)*(u);
-			a++; x++; u++;
-			blueSum  += (int)*(a) + (int)*(x) + (int)*(u);
-			a++; x++; u++;
+				a+=4; x+=3; 
+				b+=4; y+=3;
+				c+=4; z+=3;
 
-			redSum   += (int)*(b) + (int)*(y) + (int)*(v);
-			b++; y++; v++;
-			greenSum += (int)*(b) + (int)*(y) + (int)*(v);
-			b++; y++; v++;
-			blueSum  += (int)*(b) + (int)*(y) + (int)*(v);
-			b++; y++; v++;
 
-			redSum   += (int)*(c) + (int)*(z) + (int)*(w);
-			c++; z++; w++;
-			greenSum += (int)*(c) + (int)*(z) + (int)*(w);
-			c++; z++; w++;
-			blueSum  += (int)*(c) + (int)*(z) + (int)*(w);
-			c++; z++; w++;
-
-			// put the values in the target 'pixel'
-			*destr = (unsigned char)(redSum / 9);
-			*destg = (unsigned char)(greenSum / 9);
-			*destb = (unsigned char)(blueSum / 9);
-			// moving on to the next 'pixel'
-			destr += 3*sizeof(unsigned char);
-			destg += 3*sizeof(unsigned char);
-			destb += 3*sizeof(unsigned char);
-			// a += 3*sizeof(unsigned char);
-			// // ag += 3*sizeof(unsigned char);
-			// // ab += 3*sizeof(unsigned char);
-			// b += 3*sizeof(unsigned char);
-			// // bg += 3*sizeof(unsigned char);
-			// // bb += 3*sizeof(unsigned char);
-			// c += 3*sizeof(unsigned char);
-			// // cg += 3*sizeof(unsigned char);
-			// // cb += 3*sizeof(unsigned char);
-			// x += 3*sizeof(unsigned char);
-			// // xg += 3*sizeof(unsigned char);
-			// // xb += 3*sizeof(unsigned char);
-			// y += 3*sizeof(unsigned char);
-			// // yg += 3*sizeof(unsigned char);
-			// // yb += 3*sizeof(unsigned char);
-			// z += 3*sizeof(unsigned char);
-			// // zg += 3*sizeof(unsigned char);
-			// // zb += 3*sizeof(unsigned char);
-			// u += 3*sizeof(unsigned char);
-			// // ug += 3*sizeof(unsigned char);
-			// // ub += 3*sizeof(unsigned char);
-			// v += 3*sizeof(unsigned char);
-			// // vg += 3*sizeof(unsigned char);
-			// // vb += 3*sizeof(unsigned char);
-			// w += 3*sizeof(unsigned char);
-			// // wg += 3*sizeof(unsigned char);
-			// // wb += 3*sizeof(unsigned char);
+				// put the values in the target 'pixel'
+				*destr = (unsigned char)(redSum1 / 9);
+				*destg = (unsigned char)(greenSum1 / 9);
+				*destb = (unsigned char)(blueSum1 / 9);
+				// moving on to the next 'pixel'
+				destr += 3*sizeof(unsigned char);
+				destg += 3*sizeof(unsigned char);
+				destb += 3*sizeof(unsigned char);
+				// put the values in the target 'pixel'
+				*destr = (unsigned char)(redSum2 / 9);
+				*destg = (unsigned char)(greenSum2 / 9);
+				*destb = (unsigned char)(blueSum2 / 9);
+				// moving on to the next 'pixel'
+				destr += 3*sizeof(unsigned char);
+				destg += 3*sizeof(unsigned char);
+				destb += 3*sizeof(unsigned char);
+			}
+			// copy the last pixel to dst
+			*(destr) = *(v - 3);
+			*(destg) = *(v - 2);
+			*(destb) = *(v - 1);
 		}
-		// copy the last pixel to dst
-		*(destr) = *(v - 3);
-		*(destg) = *(v - 2);
-		*(destb) = *(v - 1);
+	} else {
+		for (i = 1; i < pdim - 1; i++) {
+
+			destr = dst + dim*i + 3*sizeof(unsigned char);
+			destg = dst + dim*i + 4*sizeof(unsigned char);
+			destb = dst + dim*i + 5*sizeof(unsigned char);
+
+			a = src + dim*(i-1);
+			b = src + dim*(i);
+			c = src + dim*(i+1);
+			x = src + dim*(i-1) + 3*sizeof(unsigned char);
+			y = src + dim*(i) + 3*sizeof(unsigned char);
+			z = src + dim*(i+1) + 3*sizeof(unsigned char);
+			u = src + dim*(i-1) + 6*sizeof(unsigned char);
+			v = src + dim*(i) + 6*sizeof(unsigned char);
+			w = src + dim*(i+1) + 6*sizeof(unsigned char);
+
+			// copy the first pixel to dst
+			*(destr - 3) = *b;
+			*(destg - 3) = *(b + 1);
+			*(destb - 3) = *(b + 2);
+
+			for ( j = 1; j < pdim - 1; j+=2) {
+				redSum1 = 0;
+				greenSum1 = 0;
+				blueSum1 = 0;
+				redSum2 = 0;
+				greenSum2 = 0;
+				blueSum2 = 0;
+
+				redSum1 += (int)*(x) + (int)*(u);
+				x++; u++;
+				greenSum1 += (int)*(x) + (int)*(u);
+				x++; u++;
+				blueSum1 += (int)*(x) + (int)*(u);
+				x++; u++;
+				
+
+				redSum1 += (int)*(y) + (int)*(v);
+				y++; v++;
+				greenSum1 += (int)*(y) + (int)*(v);
+				y++; v++;
+				blueSum1 += (int)*(y) + (int)*(v);
+				y++, v++;
+
+				redSum1 += (int)*(z) + (int)*(w);
+				z++; w++;
+				greenSum1 += (int)*(z) + (int)*(w);
+				z++; w++;
+				blueSum1 += (int)*(z) + (int)*(w);
+				z++; w++;
+				
+				redSum2 += redSum1 + (int)*u + (int)*v + (int)*w;
+				u++; v++; w++;
+				greenSum2 += greenSum1 + (int)*u + (int)*v + (int)*w;
+				u++; v++; w++;
+				blueSum2 += blueSum1 + (int)*u + (int)*v + (int)*w;
+				u++; v++; w++;
+				
+				redSum1 += (int)*a + (int)*b + (int)*c;
+				a++; b++; c++;
+				greenSum1 += (int)*a + (int)*b + (int)*c;
+				a++; b++; c++;
+				blueSum1 += (int)*a + (int)*b + (int)*c;
+				
+
+				a+=4; x+=3; 
+				b+=4; y+=3;
+				c+=4; z+=3;
+
+
+				// put the values in the target 'pixel'
+				*destr = (unsigned char)(redSum1 / 9);
+				*destg = (unsigned char)(greenSum1 / 9);
+				*destb = (unsigned char)(blueSum1 / 9);
+				// moving on to the next 'pixel'
+				destr += 3*sizeof(unsigned char);
+				destg += 3*sizeof(unsigned char);
+				destb += 3*sizeof(unsigned char);
+				// put the values in the target 'pixel'
+				*destr = (unsigned char)(redSum2 / 9);
+				*destg = (unsigned char)(greenSum2 / 9);
+				*destb = (unsigned char)(blueSum2 / 9);
+				// moving on to the next 'pixel'
+				destr += 3*sizeof(unsigned char);
+				destg += 3*sizeof(unsigned char);
+				destb += 3*sizeof(unsigned char);
+			}
+			/*since wer'e in the odd case, the square {{a,x,u}
+													   {b,y,v}
+													   {c,z,w}}
+			is layed out exactly around the pixel which we want to update (the equivalent of y)
+			*/
+			redSum2   -= (int)*(a - 3) + (int)*(b - 3) + (int)*(c - 3);
+			greenSum2 -= (int)*(a - 2) + (int)*(b - 2) + (int)*(c - 2);
+			blueSum2  -= (int)*(a - 1) + (int)*(b - 1) + (int)*(c - 1);
+			redSum2   += (int)*u       + (int)*v       + (int)*w;
+			greenSum2 += (int)*(u + 1) + (int)*(v + 1) + (int)*(w + 1);
+			blueSum2  += (int)*(u + 2) + (int)*(v + 2) + (int)*(w + 2);
+			// copy the last pixel to dst
+			*(destr) = *(v);
+			*(destg) = *(v + 1);
+			*(destb) = *(v + 2);
+		}
 	}
 }
 
