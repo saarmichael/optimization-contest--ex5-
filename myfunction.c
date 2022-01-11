@@ -1045,7 +1045,7 @@ void filterChars_less_vars(int pdim, unsigned char *src, char *dst) {
 	int range = pdim - 1;
 	register int redSum, greenSum, blueSum;
 	unsigned char *maxPixel, *minPixel;
-	register int sumL, sumM, sumR, min, max;
+	register int min, max;
 	unsigned int i, j;
 	for (i = 1; i < range; i++) {
 
@@ -1064,7 +1064,7 @@ void filterChars_less_vars(int pdim, unsigned char *src, char *dst) {
 			blueSum = 0;
 			min = 766;
 			max = -1;
-
+			register int sumL, sumM, sumR;
 			// the equivalent of applykernel multiplication
 			redSum   += (int)*a + (int)*x + (int)*u;
 			// calculate intensity
@@ -1112,92 +1112,92 @@ void filterChars_less_vars(int pdim, unsigned char *src, char *dst) {
 				maxPixel = x; // u - 3
 			}
 			
-
+			register int sumL1, sumM1, sumR1;
 			redSum   += (int)*b + (int)*y + (int)*v;
 			// calculate intensity
-			sumL = (int)*b;
-			sumM = (int)*y;
-			sumR = (int)*v;
+			sumL1 = (int)*b;
+			sumM1 = (int)*y;
+			sumR1 = (int)*v;
 			// move to green
 			b++; y++; v++;
 			greenSum   += (int)*b + (int)*y + (int)*v;
 			// calculate intensity
-			sumL += (int)*b;
-			sumM += (int)*y;
-			sumR += (int)*v;
+			sumL1 += (int)*b;
+			sumM1 += (int)*y;
+			sumR1 += (int)*v;
 			// move to blue
 			b++; y++; v++;
 			blueSum   += (int)*b + (int)*y + (int)*v;
 			// calculate intensity
-			sumL += (int)*b;
-			sumM += (int)*y;
-			sumR += (int)*v;
+			sumL1 += (int)*b;
+			sumM1 += (int)*y;
+			sumR1 += (int)*v;
 			b++; y++; v++;
 			
-			if (sumL <= min) {
-				min = sumL;
+			if (sumL1 <= min) {
+				min = sumL1;
 				minPixel = b - 3; 
 			}
-			if (sumL > max) {
-				max = sumL;
+			if (sumL1 > max) {
+				max = sumL1;
 				maxPixel = b - 3;
-			}if (sumM <= min) {
-				min = sumM;
+			}if (sumM1 <= min) {
+				min = sumM1;
 				minPixel = b; // y - 3
 			}
-			if (sumM > max) {
-				max = sumM;
+			if (sumM1 > max) {
+				max = sumM1;
 				maxPixel = b; // y - 3
-			}if (sumR <= min) {
-				min = sumR;
+			}if (sumR1 <= min) {
+				min = sumR1;
 				minPixel = y; // v - 3
 			}
-			if (sumR > max) {
-				max = sumR;
+			if (sumR1 > max) {
+				max = sumR1;
 				maxPixel = y; // v - 3
 			}
 			
-			
+			register int sumL2, sumM2, sumR2;
 			redSum  += (int)*c + (int)*z + (int)*w;
 			// calculate intensity
-			sumL = (int)*c;
-			sumM = (int)*z;
-			sumR = (int)*w;
+			sumL2 = (int)*c;
+			sumM2 = (int)*z;
+			sumR2 = (int)*w;
 			// move to green
 			c++; z++; w++;
 			greenSum  += (int)*c + (int)*z + (int)*w;
 			// calculate intensity
-			sumL += (int)*c;
-			sumM += (int)*z;
-			sumR += (int)*w;
+			sumL2 += (int)*c;
+			sumM2 += (int)*z;
+			sumR2 += (int)*w;
 			// move to blue
 			c++; z++; w++;
 			blueSum  += (int)*c + (int)*z + (int)*w;
 			// calculate intensity
-			sumL += (int)*c;
-			sumM += (int)*z;
-			sumR += (int)*w;
+			sumL2 += (int)*c;
+			sumM2 += (int)*z;
+			sumR2 += (int)*w;
 			c++; z++; w++;
 			
-			if (sumL <= min) {
-				min = sumL;
+			if (sumL2 <= min) {
+				min = sumL2;
 				minPixel = c - 3; 
 			}
-			if (sumL > max) {
-				max = sumL;
+			if (sumL2 > max) {
+				max = sumL2;
 				maxPixel = c - 3;
-			}if (sumM <= min) {
-				min = sumM;
+			}if (sumM2 <= min) {
+				min = sumM2;
 				minPixel = c; // z - 3
 			}
-			if (sumM > max) {
-				max = sumM;
+			if (sumM2 > max) {
+				max = sumM2;
 				maxPixel = c; // z - 3
-			}if (sumR <= min) {
-				min = sumR;
+			}if (sumR2 <= min) {
+				min = sumR2;
 				minPixel =  z; // w - 3
-			}if (sumR > max) {
-				max = sumR;
+			}if (sumR2 > max) {
+				max = sumR2;
 				maxPixel = z; // w - 3
 			}
 			
