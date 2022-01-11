@@ -26,7 +26,7 @@ void smoothNoFilter(unsigned int pdim, unsigned char *src, char *dst) {
 	char* destr = dst + dim + 3;
 	char* destg = dst + dim + 4;
 	char* destb = dst + dim + 5;
-	register int redSum1, greenSum1, blueSum1, redSum2, greenSum2, blueSum2;
+	register int sum1[0], greenSum1, blueSum1, redSum2, greenSum2, blueSum2;
 	unsigned int i, j;
 	// for the even case:
 	if (pdim % 2  == 0) {
@@ -51,14 +51,14 @@ void smoothNoFilter(unsigned int pdim, unsigned char *src, char *dst) {
 			*(destb - 3) = *(b + 2);
 
 			for ( j = 1; j < pdim - 1; j+=2) {
-				redSum1 = 0;
+				sum1[0] = 0;
 				greenSum1 = 0;
 				blueSum1 = 0;
 				redSum2 = 0;
 				greenSum2 = 0;
 				blueSum2 = 0;
 
-				redSum1 += (int)*(x) + (int)*(u);
+				sum1[0] += (int)*(x) + (int)*(u);
 				x++; u++;
 				greenSum1 += (int)*(x) + (int)*(u);
 				x++; u++;
@@ -66,28 +66,28 @@ void smoothNoFilter(unsigned int pdim, unsigned char *src, char *dst) {
 				x++; u++;
 				
 
-				redSum1 += (int)*(y) + (int)*(v);
+				sum1[0] += (int)*(y) + (int)*(v);
 				y++; v++;
 				greenSum1 += (int)*(y) + (int)*(v);
 				y++; v++;
 				blueSum1 += (int)*(y) + (int)*(v);
 				y++, v++;
 
-				redSum1 += (int)*(z) + (int)*(w);
+				sum1[0] += (int)*(z) + (int)*(w);
 				z++; w++;
 				greenSum1 += (int)*(z) + (int)*(w);
 				z++; w++;
 				blueSum1 += (int)*(z) + (int)*(w);
 				z++; w++;
 				
-				redSum2 += redSum1 + (int)*u + (int)*v + (int)*w;
+				redSum2 += sum1[0] + (int)*u + (int)*v + (int)*w;
 				u++; v++; w++;
 				greenSum2 += greenSum1 + (int)*u + (int)*v + (int)*w;
 				u++; v++; w++;
 				blueSum2 += blueSum1 + (int)*u + (int)*v + (int)*w;
 				u++; v++; w++;
 				
-				redSum1 += (int)*a + (int)*b + (int)*c;
+				sum1[0] += (int)*a + (int)*b + (int)*c;
 				a++; b++; c++;
 				greenSum1 += (int)*a + (int)*b + (int)*c;
 				a++; b++; c++;
@@ -100,7 +100,7 @@ void smoothNoFilter(unsigned int pdim, unsigned char *src, char *dst) {
 
 
 				// put the values in the target 'pixel'
-				*destr = (unsigned char)(redSum1 / 9);
+				*destr = (unsigned char)(sum1[0] / 9);
 				*destg = (unsigned char)(greenSum1 / 9);
 				*destb = (unsigned char)(blueSum1 / 9);
 				// moving on to the next 'pixel'
@@ -144,14 +144,14 @@ void smoothNoFilter(unsigned int pdim, unsigned char *src, char *dst) {
 			*(destb - 3) = *(b + 2);
 
 			for ( j = 1; j < pdim - 1 ; j+=2) {
-				redSum1 = 0;
+				sum1[0] = 0;
 				greenSum1 = 0;
 				blueSum1 = 0;
 				redSum2 = 0;
 				greenSum2 = 0;
 				blueSum2 = 0;
 
-				redSum1 += (int)*(x) + (int)*(u);
+				sum1[0] += (int)*(x) + (int)*(u);
 				x++; u++;
 				greenSum1 += (int)*(x) + (int)*(u);
 				x++; u++;
@@ -159,28 +159,28 @@ void smoothNoFilter(unsigned int pdim, unsigned char *src, char *dst) {
 				x++; u++;
 				
 
-				redSum1 += (int)*(y) + (int)*(v);
+				sum1[0] += (int)*(y) + (int)*(v);
 				y++; v++;
 				greenSum1 += (int)*(y) + (int)*(v);
 				y++; v++;
 				blueSum1 += (int)*(y) + (int)*(v);
 				y++, v++;
 
-				redSum1 += (int)*(z) + (int)*(w);
+				sum1[0] += (int)*(z) + (int)*(w);
 				z++; w++;
 				greenSum1 += (int)*(z) + (int)*(w);
 				z++; w++;
 				blueSum1 += (int)*(z) + (int)*(w);
 				z++; w++;
 				
-				redSum2 += redSum1 + (int)*u + (int)*v + (int)*w;
+				redSum2 += sum1[0] + (int)*u + (int)*v + (int)*w;
 				u++; v++; w++;
 				greenSum2 += greenSum1 + (int)*u + (int)*v + (int)*w;
 				u++; v++; w++;
 				blueSum2 += blueSum1 + (int)*u + (int)*v + (int)*w;
 				u++; v++; w++;
 				
-				redSum1 += (int)*a + (int)*b + (int)*c;
+				sum1[0] += (int)*a + (int)*b + (int)*c;
 				a++; b++; c++;
 				greenSum1 += (int)*a + (int)*b + (int)*c;
 				a++; b++; c++;
@@ -193,7 +193,7 @@ void smoothNoFilter(unsigned int pdim, unsigned char *src, char *dst) {
 
 
 				// put the values in the target 'pixel'
-				*destr = (unsigned char)(redSum1 / 9);
+				*destr = (unsigned char)(sum1[0] / 9);
 				*destg = (unsigned char)(greenSum1 / 9);
 				*destb = (unsigned char)(blueSum1 / 9);
 				// moving on to the next 'pixel'
@@ -483,7 +483,7 @@ void sharp_unrolled(int pdim, unsigned char* src, char* dst) {
 	char* destr = dst + dim + 3;
 	char* destg = dst + dim + 4;
 	char* destb = dst + dim + 5;
-	register int redSum1, greenSum1, blueSum1, redSum2, greenSum2, blueSum2;
+	register int sum1[0], greenSum1, blueSum1, redSum2, greenSum2, blueSum2;
 	unsigned int i, j;
 	for (i = 1; i < pdim - 1; i++) {
 
@@ -506,7 +506,7 @@ void sharp_unrolled(int pdim, unsigned char* src, char* dst) {
 		*(destb - 3) = *(b + 2);
 		
 		for ( j = 1; j < pdim - 1; j++) {
-			redSum1 = 0;
+			sum1[0] = 0;
 			greenSum1 = 0;
 			blueSum1 = 0;
 			redSum2 = 0;
@@ -534,14 +534,14 @@ void sharp_unrolled(int pdim, unsigned char* src, char* dst) {
 			blueSum2  -= (int)*(z) + (int)*(w);
 			z++; w++;
 
-			redSum1 -= (int)*(a) + (int)*(b) + (int)*(c);
+			sum1[0] -= (int)*(a) + (int)*(b) + (int)*(c);
 			a++; b++; c++;
 			greenSum1 -= (int)*(a) + (int)*(b) + (int)*(c);
 			a++; b++; c++;
 			blueSum1 -= (int)*(a) + (int)*(b) + (int)*(c);
  
 
-			redSum1 += redSum2 + 10*(*(b+1)) -10*(*(y));
+			sum1[0] += redSum2 + 10*(*(b+1)) -10*(*(y));
 			greenSum1 += greenSum2 + 10*(*(b+2)) -10*(*(y+1));
 			blueSum1 += blueSum2 + 10*(*(b+3)) -10*(*(y+2));
 
@@ -571,7 +571,7 @@ void sharp_unrolled(int pdim, unsigned char* src, char* dst) {
 			
 
 			// put the values in the target 'pixel'
-			*destr = (unsigned char)(MIN(MAX(redSum1, 0), 255));
+			*destr = (unsigned char)(MIN(MAX(sum1[0], 0), 255));
 			*destg = (unsigned char)(MIN(MAX(greenSum1, 0), 255));
 			*destb = (unsigned char)(MIN(MAX(blueSum1, 0), 255));
 			// moving on to the next 'pixel'
@@ -1245,6 +1245,594 @@ void filterChars_less_vars(int pdim, unsigned char *src, char *dst) {
  
 }
 
+void filter_chars_loop_unrolled(unsigned int pdim, unsigned char *src, char *dst) {
+	
+	int dim = pdim * 3;
+	// copy the first row of pixels to dst
+	memcpy(dst, src, dim);
+	// copy the last row of pixels to dst
+	memcpy(dst + ((pdim - 1)*dim), src + ((pdim - 1)*dim), dim);
+	
+	register unsigned char* a = src;
+	register unsigned char* b = src + dim;
+	register unsigned char* c = src + dim + dim;
+	register unsigned char* x = src + 3;
+	register unsigned char* y = src + dim + 3;
+	register unsigned char* z = src + dim + dim + 3;
+	register unsigned char* u = src + 6;
+	register unsigned char* v = src + dim + 6;
+	register unsigned char* w = src + dim + dim + 6;
+	char* destr = dst + dim + 3;
+	char* destg = dst + dim + 4;
+	char* destb = dst + dim + 5;
+	unsigned char *maxPixel1, *minPixel1, *maxPixel2, *minPixel2;
+	int min1, max1, min2, max2;
+	register int sum1[3] = {0, 0, 0}; // rgb
+	register int sum2[3] = {0, 0, 0}; // rgb
+	register int intensity[4] = {0, 0, 0, 0};
+	unsigned int i, j;
+	// for the even case:
+	if (pdim % 2  == 0) {
+		for (i = 1; i < pdim - 1; i++) {
+			destr = dst + dim*i + 3*sizeof(unsigned char);
+			destg = dst + dim*i + 4*sizeof(unsigned char);
+			destb = dst + dim*i + 5*sizeof(unsigned char);
+
+			a = src + dim*(i-1);
+			b = src + dim*(i);
+			c = src + dim*(i+1);
+			x = src + dim*(i-1) + 3*sizeof(unsigned char);
+			y = src + dim*(i) + 3*sizeof(unsigned char);
+			z = src + dim*(i+1) + 3*sizeof(unsigned char);
+			u = src + dim*(i-1) + 6*sizeof(unsigned char);
+			v = src + dim*(i) + 6*sizeof(unsigned char);
+			w = src + dim*(i+1) + 6*sizeof(unsigned char);
+
+			// copy the first pixel to dst
+			*(destr - 3) = *b;
+			*(destg - 3) = *(b + 1);
+			*(destb - 3) = *(b + 2);
+
+			for ( j = 1; j < pdim - 1; j+=2) {
+				min2 = 766;
+				max2 = -1;
+
+				sum1[0] += (int)*(x) + (int)*(u); // r
+				intensity[1] = (int)*x;
+				intensity[2] = (int)*u;
+				x++; u++;
+				sum1[1] += (int)*(x) + (int)*(u); // g
+				intensity[1] += (int)*x;
+				intensity[2] += (int)*u;
+				x++; u++;
+				sum1[2] += (int)*(x) + (int)*(u); // b
+				intensity[1] += (int)*x;
+				intensity[2] += (int)*u;
+				x++; u++;
+				
+				if (intensity[1] <= min2) {
+					min2 = intensity[1];
+					minPixel2 = a + 3; // x - 3 
+				}
+				if (intensity[1] > max2) {
+					max2 = intensity[1];
+					maxPixel2 = a + 3; // x - 3 
+				}
+				if (intensity[2] <= min2) {
+					min2 = intensity[2];
+					minPixel2 = x; // u - 3
+				}
+				if (intensity[2] > max2) {
+					max2 = intensity[2];
+					maxPixel2 = x; // u - 3
+				}
+
+				sum1[0] += (int)*(y) + (int)*(v);
+				intensity[1] = (int)*y;
+				intensity[2] = (int)*v;
+				y++; v++;
+				sum1[1] += (int)*(y) + (int)*(v);
+				intensity[1] += (int)*y;
+				intensity[2] += (int)*v;
+				y++; v++;
+				sum1[2] += (int)*(y) + (int)*(v);
+				intensity[1] += (int)*y;
+				intensity[2] += (int)*v;
+				y++, v++;
+
+				if (intensity[1] <= min2) {
+					min2 = intensity[1];
+					minPixel2 = b + 3; // y - 3 
+				}
+				if (intensity[1] > max2) {
+					max2 = intensity[1];
+					maxPixel2 = b + 3; // y - 3 
+				}
+				if (intensity[2] <= min2) {
+					min2 = intensity[2];
+					minPixel2 = y; // v - 3
+				}
+				if (intensity[2] > max2) {
+					max2 = intensity[2];
+					maxPixel2 = y; // v - 3
+				}
+
+				sum1[0] += (int)*(z) + (int)*(w);
+				intensity[1] = (int)*z;
+				intensity[2] = (int)*w;
+				z++; w++;
+				sum1[1] += (int)*(z) + (int)*(w);
+				intensity[1] += (int)*z;
+				intensity[2] += (int)*w;
+				z++; w++;
+				sum1[2] += (int)*(z) + (int)*(w);
+				intensity[1] += (int)*z;
+				intensity[2] += (int)*w;
+				z++; w++;
+
+				if (intensity[1] <= min2) {
+					min2 = intensity[1];
+					minPixel2 = c + 3; // z - 3 
+				}
+				if (intensity[1] > max2) {
+					max2= intensity[1];
+					maxPixel2 = c + 3; // z - 3 
+				}
+				if (intensity[2] <= min2) {
+					min2 = intensity[2];
+					minPixel2 = z; // w - 3
+				}
+				if (intensity[2] > max2) {
+					max2 = intensity[2];
+					maxPixel2 = z; // w - 3
+				}
+
+				// we now fount the sum of the two middle collumns (xyz, uvw)
+				// and also the max and min intensity from those pixels
+				// now we need to calculate seperatly for the first and fourth collumns
+				// for this block of code sum1 is the TOP pixel, sum2 is the MIDDLE and sum3 is the BOTTOM pixel
+				sum2[0] += sum1[0] + (int)*u + (int)*v + (int)*w;
+				intensity[0] = (int)*u;
+				intensity[1] = (int)*v;
+				intensity[2] = (int)*w;
+				u++; v++; w++;
+				sum2[1] += sum1[1] + (int)*u + (int)*v + (int)*w;
+				intensity[0] += (int)*u;
+				intensity[1] += (int)*v;
+				intensity[2] += (int)*w;
+				u++; v++; w++;
+				sum2[2] += sum1[2] + (int)*u + (int)*v + (int)*w;
+				intensity[0] += (int)*u;
+				intensity[1] += (int)*v;
+				intensity[2] += (int)*w;
+				u++; v++; w++;
+
+				if ((intensity[0] > max2) || (((intensity[0] == max2) && ((u-3) < maxPixel2)))) {
+					max2 = intensity[0];
+					maxPixel2 = u - 3;
+				}
+				if ((intensity[0] < min2) || (((intensity[0] == min2) && ((u-3) > minPixel2)))) {
+					min2 = intensity[0];
+					minPixel2 = u - 3;
+				}
+				if ((intensity[1] > max2) || (((intensity[1] == max2) && ((v-3) < maxPixel2)))) {
+					max2 = intensity[0];
+					maxPixel2 = v - 3;
+				}
+				if ((intensity[1] < min2) || (((intensity[1] == min2) && ((v-3) > minPixel2)))) {
+					min2 = intensity[1];
+					minPixel2 = v - 3;
+				}
+				if ((intensity[2] > max2)) {
+					max2 = intensity[2];
+					maxPixel2 = w - 3;
+				}
+				if ((intensity[2] <= min2)) {
+					min2 = intensity[2];
+					minPixel2 = w - 3;
+				}
+				
+				
+				
+				sum1[0] += (int)*a + (int)*b + (int)*c;
+				intensity[0] = (int)*a;
+				intensity[1] = (int)*b;
+				intensity[2] = (int)*c;
+				a++; b++; c++;
+				sum1[1] += (int)*a + (int)*b + (int)*c;
+				intensity[0] += (int)*a;
+				intensity[1] += (int)*b;
+				intensity[2] += (int)*c;
+				a++; b++; c++;
+				sum1[2] += (int)*a + (int)*b + (int)*c;
+				intensity[0] += (int)*a;
+				intensity[1] += (int)*b;
+				intensity[2] += (int)*c;
+
+				if(intensity[0] >= max1) {
+					max1 = intensity[0];
+					maxPixel1 = a - 3;
+				}
+				if(intensity[0] < min1) {
+					min1 = intensity[0];
+					minPixel1 = a - 3;
+				}
+				if((intensity[1] > max1) || ((intensity[1] == max1)&&(maxPixel1 > (b - 3)))) {
+					max1 = intensity[1];
+					maxPixel1 = b - 3;
+				}
+				if((intensity[1] < min1) || ((intensity[1] == min1)&&(minPixel1 < (b - 3)))) {
+					min1 = intensity[1];
+					minPixel1 = b - 3;
+				}
+				if((intensity[2] > max1) || ((intensity[2] == max1)&&(maxPixel1 > (c - 3)))) {
+					max1 = intensity[2];
+					maxPixel1 = c - 3;
+				}
+				if((intensity[2] < min1) || ((intensity[2] == min1)&&(minPixel1 < (c - 3)))) {
+					min1 = intensity[2];
+					minPixel1 = c - 3;
+				}
+				
+
+				a+=4; x+=3; 
+				b+=4; y+=3;
+				c+=4; z+=3;
+
+
+				// put the values in the target 'pixel'
+				sum1[0] = (unsigned char)(sum1[0] / 7);
+				sum1[1] = (unsigned char)(sum1[1] / 7);
+				sum1[2] = (unsigned char)(sum1[2] / 7);
+				sum2[0] = (unsigned char)(sum1[0] / 7);
+				sum2[1] = (unsigned char)(sum1[1] / 7);
+				sum2[2] = (unsigned char)(sum1[2] / 7);
+				// truncate the pixel values [0,255]
+				if (0 != (sum1[0] & 0b10000000000000000000000000000000)) {
+					*destr = (unsigned char) 0;
+				} 
+				else if (0 != (sum1[0] & 0b11111111111111111111111100000000)) {
+					*destr = (unsigned char)255;
+				} else {
+					*destr = sum1[0];
+				}
+				if (0 != (sum1[1] & 0b10000000000000000000000000000000)) {
+					*destg = (unsigned char)0;
+				} 
+				else if (0 != (sum1[1] & 0b11111111111111111111111100000000)) {
+					*destg = (unsigned char)255;
+				} else {
+					*destg = sum1[1];
+				}
+				if (0 != (sum1[2] & 0b10000000000000000000000000000000)) {
+					*destb = (unsigned char)0;
+				} 
+				else if (0 != (sum1[2] & 0b11111111111111111111111100000000)) {
+					*destb = (unsigned char)255;
+				} else {
+					*destb = sum1[2];
+				}
+				// moving on to the next 'pixel'
+				destr += 3;
+				destg += 3;
+				destb += 3;
+				// truncate the pixel values [0,255]
+				if (0 != (sum2[0] & 0b10000000000000000000000000000000)) {
+					*destr = (unsigned char) 0;
+				} 
+				else if (0 != (sum2[0] & 0b11111111111111111111111100000000)) {
+					*destr = (unsigned char)255;
+				} else {
+					*destr = sum2[0];
+				}
+				if (0 != (sum2[1] & 0b10000000000000000000000000000000)) {
+					*destg = (unsigned char)0;
+				} 
+				else if (0 != (sum2[1] & 0b11111111111111111111111100000000)) {
+					*destg = (unsigned char)255;
+				} else {
+					*destg = sum2[1];
+				}
+				if (0 != (sum2[2] & 0b10000000000000000000000000000000)) {
+					*destb = (unsigned char)0;
+				} 
+				else if (0 != (sum2[2] & 0b11111111111111111111111100000000)) {
+					*destb = (unsigned char)255;
+				} else {
+					*destb = sum2[2];
+				}
+				// moving on to the next 'pixel'
+				destr += 3;
+				destg += 3;
+				destb += 3;
+			}
+			// copy the last pixel to dst
+			*(destr) = *(v - 3);
+			*(destg) = *(v - 2);
+			*(destb) = *(v - 1);
+		}
+	} else {
+		for (i = 1; i < pdim - 1; i++) {
+
+			destr = dst + dim*i + 3*sizeof(unsigned char);
+			destg = dst + dim*i + 4*sizeof(unsigned char);
+			destb = dst + dim*i + 5*sizeof(unsigned char);
+
+			a = src + dim*(i-1);
+			b = src + dim*(i);
+			c = src + dim*(i+1);
+			x = src + dim*(i-1) + 3*sizeof(unsigned char);
+			y = src + dim*(i) + 3*sizeof(unsigned char);
+			z = src + dim*(i+1) + 3*sizeof(unsigned char);
+			u = src + dim*(i-1) + 6*sizeof(unsigned char);
+			v = src + dim*(i) + 6*sizeof(unsigned char);
+			w = src + dim*(i+1) + 6*sizeof(unsigned char);
+
+			// copy the first pixel to dst
+			*(destr - 3) = *b;
+			*(destg - 3) = *(b + 1);
+			*(destb - 3) = *(b + 2);
+
+			for ( j = 1; j < pdim - 1; j+=2) {
+				min2 = 766;
+				max2 = -1;
+
+				sum1[0] += (int)*(x) + (int)*(u); // r
+				intensity[1] = (int)*x;
+				intensity[2] = (int)*u;
+				x++; u++;
+				sum1[1] += (int)*(x) + (int)*(u); // g
+				intensity[1] += (int)*x;
+				intensity[2] += (int)*u;
+				x++; u++;
+				sum1[2] += (int)*(x) + (int)*(u); // b
+				intensity[1] += (int)*x;
+				intensity[2] += (int)*u;
+				x++; u++;
+				
+				if (intensity[1] <= min2) {
+					min2 = intensity[1];
+					minPixel2 = a + 3; // x - 3 
+				}
+				if (intensity[1] > max2) {
+					max2 = intensity[1];
+					maxPixel2 = a + 3; // x - 3 
+				}
+				if (intensity[2] <= min2) {
+					min2 = intensity[2];
+					minPixel2 = x; // u - 3
+				}
+				if (intensity[2] > max2) {
+					max2 = intensity[2];
+					maxPixel2 = x; // u - 3
+				}
+
+				sum1[0] += (int)*(y) + (int)*(v);
+				intensity[1] = (int)*y;
+				intensity[2] = (int)*v;
+				y++; v++;
+				sum1[1] += (int)*(y) + (int)*(v);
+				intensity[1] += (int)*y;
+				intensity[2] += (int)*v;
+				y++; v++;
+				sum1[2] += (int)*(y) + (int)*(v);
+				intensity[1] += (int)*y;
+				intensity[2] += (int)*v;
+				y++, v++;
+
+				if (intensity[1] <= min2) {
+					min2 = intensity[1];
+					minPixel2 = b + 3; // y - 3 
+				}
+				if (intensity[1] > max2) {
+					max2 = intensity[1];
+					maxPixel2 = b + 3; // y - 3 
+				}
+				if (intensity[2] <= min2) {
+					min2 = intensity[2];
+					minPixel2 = y; // v - 3
+				}
+				if (intensity[2] > max2) {
+					max2 = intensity[2];
+					maxPixel2 = y; // v - 3
+				}
+
+				sum1[0] += (int)*(z) + (int)*(w);
+				intensity[1] = (int)*z;
+				intensity[2] = (int)*w;
+				z++; w++;
+				sum1[1] += (int)*(z) + (int)*(w);
+				intensity[1] += (int)*z;
+				intensity[2] += (int)*w;
+				z++; w++;
+				sum1[2] += (int)*(z) + (int)*(w);
+				intensity[1] += (int)*z;
+				intensity[2] += (int)*w;
+				z++; w++;
+
+				if (intensity[1] <= min2) {
+					min2 = intensity[1];
+					minPixel2 = c + 3; // z - 3 
+				}
+				if (intensity[1] > max2) {
+					max2= intensity[1];
+					maxPixel2 = c + 3; // z - 3 
+				}
+				if (intensity[2] <= min2) {
+					min2 = intensity[2];
+					minPixel2 = z; // w - 3
+				}
+				if (intensity[2] > max2) {
+					max2 = intensity[2];
+					maxPixel2 = z; // w - 3
+				}
+
+				// we now fount the sum of the two middle collumns (xyz, uvw)
+				// and also the max and min intensity from those pixels
+				// now we need to calculate seperatly for the first and fourth collumns
+				// for this block of code sum1 is the TOP pixel, sum2 is the MIDDLE and sum3 is the BOTTOM pixel
+				sum2[0] += sum1[0] + (int)*u + (int)*v + (int)*w;
+				intensity[0] = (int)*u;
+				intensity[1] = (int)*v;
+				intensity[2] = (int)*w;
+				u++; v++; w++;
+				sum2[1] += sum1[1] + (int)*u + (int)*v + (int)*w;
+				intensity[0] += (int)*u;
+				intensity[1] += (int)*v;
+				intensity[2] += (int)*w;
+				u++; v++; w++;
+				sum2[2] += sum1[2] + (int)*u + (int)*v + (int)*w;
+				intensity[0] += (int)*u;
+				intensity[1] += (int)*v;
+				intensity[2] += (int)*w;
+				u++; v++; w++;
+
+				if ((intensity[0] > max2) || (((intensity[0] == max2) && ((u-3) < maxPixel2)))) {
+					max2 = intensity[0];
+					maxPixel2 = u - 3;
+				}
+				if ((intensity[0] < min2) || (((intensity[0] == min2) && ((u-3) > minPixel2)))) {
+					min2 = intensity[0];
+					minPixel2 = u - 3;
+				}
+				if ((intensity[1] > max2) || (((intensity[1] == max2) && ((v-3) < maxPixel2)))) {
+					max2 = intensity[0];
+					maxPixel2 = v - 3;
+				}
+				if ((intensity[1] < min2) || (((intensity[1] == min2) && ((v-3) > minPixel2)))) {
+					min2 = intensity[1];
+					minPixel2 = v - 3;
+				}
+				if ((intensity[2] > max2)) {
+					max2 = intensity[2];
+					maxPixel2 = w - 3;
+				}
+				if ((intensity[2] <= min2)) {
+					min2 = intensity[2];
+					minPixel2 = w - 3;
+				}
+				
+				
+				
+				sum1[0] += (int)*a + (int)*b + (int)*c;
+				intensity[0] = (int)*a;
+				intensity[1] = (int)*b;
+				intensity[2] = (int)*c;
+				a++; b++; c++;
+				sum1[1] += (int)*a + (int)*b + (int)*c;
+				intensity[0] += (int)*a;
+				intensity[1] += (int)*b;
+				intensity[2] += (int)*c;
+				a++; b++; c++;
+				sum1[2] += (int)*a + (int)*b + (int)*c;
+				intensity[0] += (int)*a;
+				intensity[1] += (int)*b;
+				intensity[2] += (int)*c;
+
+				if(intensity[0] >= max1) {
+					max1 = intensity[0];
+					maxPixel1 = a - 3;
+				}
+				if(intensity[0] < min1) {
+					min1 = intensity[0];
+					minPixel1 = a - 3;
+				}
+				if((intensity[1] > max1) || ((intensity[1] == max1)&&(maxPixel1 > (b - 3)))) {
+					max1 = intensity[1];
+					maxPixel1 = b - 3;
+				}
+				if((intensity[1] < min1) || ((intensity[1] == min1)&&(minPixel1 < (b - 3)))) {
+					min1 = intensity[1];
+					minPixel1 = b - 3;
+				}
+				if((intensity[2] > max1) || ((intensity[2] == max1)&&(maxPixel1 > (c - 3)))) {
+					max1 = intensity[2];
+					maxPixel1 = c - 3;
+				}
+				if((intensity[2] < min1) || ((intensity[2] == min1)&&(minPixel1 < (c - 3)))) {
+					min1 = intensity[2];
+					minPixel1 = c - 3;
+				}
+				
+
+				a+=4; x+=3; 
+				b+=4; y+=3;
+				c+=4; z+=3;
+
+
+				// put the values in the target 'pixel'
+				sum1[0] = (unsigned char)(sum1[0] / 7);
+				sum1[1] = (unsigned char)(sum1[1] / 7);
+				sum1[2] = (unsigned char)(sum1[2] / 7);
+				sum2[0] = (unsigned char)(sum1[0] / 7);
+				sum2[1] = (unsigned char)(sum1[1] / 7);
+				sum2[2] = (unsigned char)(sum1[2] / 7);
+				// truncate the pixel values [0,255]
+				if (0 != (sum1[0] & 0b10000000000000000000000000000000)) {
+					*destr = (unsigned char) 0;
+				} 
+				else if (0 != (sum1[0] & 0b11111111111111111111111100000000)) {
+					*destr = (unsigned char)255;
+				} else {
+					*destr = sum1[0];
+				}
+				if (0 != (sum1[1] & 0b10000000000000000000000000000000)) {
+					*destg = (unsigned char)0;
+				} 
+				else if (0 != (sum1[1] & 0b11111111111111111111111100000000)) {
+					*destg = (unsigned char)255;
+				} else {
+					*destg = sum1[1];
+				}
+				if (0 != (sum1[2] & 0b10000000000000000000000000000000)) {
+					*destb = (unsigned char)0;
+				} 
+				else if (0 != (sum1[2] & 0b11111111111111111111111100000000)) {
+					*destb = (unsigned char)255;
+				} else {
+					*destb = sum1[2];
+				}
+				// moving on to the next 'pixel'
+				destr += 3;
+				destg += 3;
+				destb += 3;
+				// truncate the pixel values [0,255]
+				if (0 != (sum2[0] & 0b10000000000000000000000000000000)) {
+					*destr = (unsigned char) 0;
+				} 
+				else if (0 != (sum2[0] & 0b11111111111111111111111100000000)) {
+					*destr = (unsigned char)255;
+				} else {
+					*destr = sum2[0];
+				}
+				if (0 != (sum2[1] & 0b10000000000000000000000000000000)) {
+					*destg = (unsigned char)0;
+				} 
+				else if (0 != (sum2[1] & 0b11111111111111111111111100000000)) {
+					*destg = (unsigned char)255;
+				} else {
+					*destg = sum2[1];
+				}
+				if (0 != (sum2[2] & 0b10000000000000000000000000000000)) {
+					*destb = (unsigned char)0;
+				} 
+				else if (0 != (sum2[2] & 0b11111111111111111111111100000000)) {
+					*destb = (unsigned char)255;
+				} else {
+					*destb = sum2[2];
+				}
+				// moving on to the next 'pixel'
+				destr += 3;
+				destg += 3;
+				destb += 3;
+			}
+			*(destr - 3) = *(v - 6);
+			*(destg - 3) = *(v - 5);
+			*(destb - 3) = *(v - 4);
+		}
+	}
+}
+
 
 void doConvolution1(Image *image) {
 
@@ -1266,7 +1854,7 @@ void doConvolution3(Image *image) {
 
 	char* newImage = (unsigned char*)malloc(3*m*n*sizeof(unsigned char));
 	
-	filterChars_less_vars(m, image->data, newImage);
+	filter_chars_loop_unrolled(m, image->data, newImage);
 	image->data = newImage;
 }
 
