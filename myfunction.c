@@ -372,25 +372,27 @@ void sharp_less_vars(int pdim, unsigned char* src, char* dst) {
 	// copy the last row of pixels to dst
 	memcpy(dst + ((pdim - 1)*dim), src + ((pdim - 1)*dim), dim);
 	register unsigned char* a = src;
-	register unsigned char* b = src + dim;
-	register unsigned char* c = src + dim + dim;
 	register unsigned char* x = src + 3;
-	register unsigned char* y = src + dim + 3;
-	register unsigned char* z = src + dim + dim + 3;
 	register unsigned char* u = src + 6;
+	register unsigned char* b = src + dim;
+	register unsigned char* y = src + dim + 3;
 	register unsigned char* v = src + dim + 6;
+	register unsigned char* c = src + dim + dim;
+	register unsigned char* z = src + dim + dim + 3;
 	register unsigned char* w = src + dim + dim + 6;
-	char* destr = dst + dim + 3;
-	char* destg = dst + dim + 4;
-	char* destb = dst + dim + 5;
+	register char* destr = dst + dim;
+	register char* destg = dst + dim + 1;
+	register char* destb = dst + dim + 2;
 	register int redSum, greenSum, blueSum;
 	unsigned int i, j;
 	for (i = 1; i < pdim - 1; i++) {
 		// copy the first pixel to dst
-		*(destr - 3) = *b;
-		*(destg - 3) = *(b + 1);
-		*(destb - 3) = *(b + 2);
-		
+		*(destr) = *b;
+		*(destg) = *(b + 1);
+		*(destb) = *(b + 2);
+		destr += 3;
+		destg += 3;
+		destb += 3;
 		for ( j = 1; j < pdim - 1; j++) {
 			redSum = 0;
 			greenSum = 0;
@@ -400,25 +402,26 @@ void sharp_less_vars(int pdim, unsigned char* src, char* dst) {
 			          + (int)*(v) + (int)*(c) + (int)*(z) + (int)*(w);
 			
 			redSum += MULT9((int)*(y));
-			a++; x++; u++;
-			b++; y++; v++;
-			c++; z++; w++;
+			// a++; x++; u++;
+			// b++; y++; v++;
+			// c++; z++; w++;
 
-			greenSum -=   (int)*(a) + (int)*(x) + (int)*(u) + (int)*(b) 
-			            + (int)*(v) + (int)*(c) + (int)*(z) + (int)*(w);
+			greenSum -=   (int)*(a+1) + (int)*(x+1) + (int)*(u+1) + (int)*(b+1) 
+			            + (int)*(v+1) + (int)*(c+1) + (int)*(z+1) + (int)*(w+1);
 			
-			greenSum += MULT9((int)*(y));
-			a++; x++; u++;
-			b++; y++; v++;
-			c++; z++; w++;
+			greenSum += MULT9((int)*(y+1));
+			// a++; x++; u++;
+			// b++; y++; v++;
+			// c++; z++; w++;
 
-			blueSum -=   (int)*(a) + (int)*(x) + (int)*(u) + (int)*(b) 
-			           + (int)*(v) + (int)*(c) + (int)*(z) + (int)*(w);
+			blueSum -=   (int)*(a+2) + (int)*(x+2) + (int)*(u+2) + (int)*(b+2) 
+			           + (int)*(v+2) + (int)*(c+2) + (int)*(z+2) + (int)*(w+2);
 			
-			blueSum += MULT9((int)*(y));
-			a++; x++; u++;
-			b++; y++; v++;
-			c++; z++; w++;
+			blueSum += MULT9((int)*(y+2));
+			// a++; x++; u++;
+			// b++; y++; v++;
+			// c++; z++; w++;
+			
 		
 			// put the values in the target 'pixel'
 			// truncate the pixel values [0,255]
@@ -446,7 +449,9 @@ void sharp_less_vars(int pdim, unsigned char* src, char* dst) {
 			} else {
 				*destb = blueSum;
 			}
-			
+			a+=3; x+=3; u+=3;
+			b+=3; y+=3; v+=3;
+			c+=3; z+=3; w+=3;
 			// moving on to the next 'pixel'
 			destr += 3;
 			destg += 3;
@@ -461,7 +466,7 @@ void sharp_less_vars(int pdim, unsigned char* src, char* dst) {
 		a+=6; x+=6; u+=6;
 		b+=6; y+=6; v+=6;
 		c+=6; z+=6; w+=6;
-		destr +=6; destg+=6; destb+=6;
+		destr +=3; destg+=3; destb+=3;
 	}
 }
 
@@ -1072,45 +1077,47 @@ void filterChars_less_vars(int pdim, unsigned char *src, char *dst) {
 			sumM = (int)*x;
 			sumR = (int)*u;
 			// move to green
-			a++; x++; u++;
-			greenSum   += (int)*a + (int)*x + (int)*u;
+			//a++; x++; u++;
+			greenSum   += (int)*(a+1) + (int)*(x+1) + (int)*(u+1);
 			// calculate intensity
-			sumL += (int)*a;
-			sumM += (int)*x;
-			sumR += (int)*u;
+			sumL += (int)*(a+1);
+			sumM += (int)*(x+1);
+			sumR += (int)*(u+1);
 			// move to blue
-			a++; x++; u++;
-			blueSum   += (int)*a + (int)*x + (int)*u;
+			//a++; x++; u++;
+			blueSum   += (int)*(a+2) + (int)*(x+2) + (int)*(u+2);
 			// calculate intensity
-			sumL += (int)*a;
-			sumM += (int)*x;
-			sumR += (int)*u;
-			a++; x++; u++;
+			sumL += (int)*(a+2);
+			sumM += (int)*(x+2);
+			sumR += (int)*(u+2);
+			//a++; x++; u++;
+			// a+=3; x+=3; u+=3;
 			
 			if (sumL <= min) {
 				min = sumL;
-				minPixel = a - 3; 
+				minPixel = a; 
 			}
 			if (sumL > max) {
 				max = sumL;
-				maxPixel = a - 3;
+				maxPixel = a;
 			}
 			if (sumM <= min) {
 				min = sumM;
-				minPixel = a; // x - 3
+				minPixel = x; // x - 3
 			}
 			if (sumM > max) {
 				max = sumM;
-				maxPixel = a; // x - 3
+				maxPixel = x; // x - 3
 			}
 			if (sumR <= min) {
 				min = sumR;
-				minPixel = x; // u - 3
+				minPixel = u; // u - 3
 			}
 			if (sumR > max) {
 				max = sumR;
-				maxPixel = x; // u - 3
+				maxPixel = u; // u - 3
 			}
+			a+=3; x+=3; u+=3;
 			
 			register int sumL1, sumM1, sumR1;
 			redSum   += (int)*b + (int)*y + (int)*v;
@@ -1119,44 +1126,44 @@ void filterChars_less_vars(int pdim, unsigned char *src, char *dst) {
 			sumM1 = (int)*y;
 			sumR1 = (int)*v;
 			// move to green
-			b++; y++; v++;
-			greenSum   += (int)*b + (int)*y + (int)*v;
+			//b++; y++; v++;
+			greenSum   += (int)*(b+1) + (int)*(y+1) + (int)*(v+1);
 			// calculate intensity
-			sumL1 += (int)*b;
-			sumM1 += (int)*y;
-			sumR1 += (int)*v;
+			sumL1 += (int)*(b+1);
+			sumM1 += (int)*(y+1);
+			sumR1 += (int)*(v+1);
 			// move to blue
-			b++; y++; v++;
-			blueSum   += (int)*b + (int)*y + (int)*v;
+			//b++; y++; v++;
+			blueSum   += (int)*(b+2) + (int)*(y+2) + (int)*(v+2);
 			// calculate intensity
-			sumL1 += (int)*b;
-			sumM1 += (int)*y;
-			sumR1 += (int)*v;
-			b++; y++; v++;
+			sumL1 += (int)*(b+2);
+			sumM1 += (int)*(y+2);
+			sumR1 += (int)*(v+2);
+			// b++; y++; v++;
 			
 			if (sumL1 <= min) {
 				min = sumL1;
-				minPixel = b - 3; 
+				minPixel = b; 
 			}
 			if (sumL1 > max) {
 				max = sumL1;
-				maxPixel = b - 3;
+				maxPixel = b;
 			}if (sumM1 <= min) {
 				min = sumM1;
-				minPixel = b; // y - 3
+				minPixel = y; // y - 3
 			}
 			if (sumM1 > max) {
 				max = sumM1;
-				maxPixel = b; // y - 3
+				maxPixel = y; // y - 3
 			}if (sumR1 <= min) {
 				min = sumR1;
-				minPixel = y; // v - 3
+				minPixel = v; // v - 3
 			}
 			if (sumR1 > max) {
 				max = sumR1;
-				maxPixel = y; // v - 3
+				maxPixel = v; // v - 3
 			}
-			
+			b+=3; y+=3; v+=3;
 			register int sumL2, sumM2, sumR2;
 			redSum  += (int)*c + (int)*z + (int)*w;
 			// calculate intensity
@@ -1164,43 +1171,43 @@ void filterChars_less_vars(int pdim, unsigned char *src, char *dst) {
 			sumM2 = (int)*z;
 			sumR2 = (int)*w;
 			// move to green
-			c++; z++; w++;
-			greenSum  += (int)*c + (int)*z + (int)*w;
+			//c++; z++; w++;
+			greenSum  += (int)*(c+1) + (int)*(z+1) + (int)*(w+1);
 			// calculate intensity
-			sumL2 += (int)*c;
-			sumM2 += (int)*z;
-			sumR2 += (int)*w;
+			sumL2 += (int)*(c+1);
+			sumM2 += (int)*(z+1);
+			sumR2 += (int)*(w+1);
 			// move to blue
-			c++; z++; w++;
-			blueSum  += (int)*c + (int)*z + (int)*w;
+			//c++; z++; w++;
+			blueSum  += (int)*(c+2) + (int)*(z+2) + (int)*(w+2);
 			// calculate intensity
-			sumL2 += (int)*c;
-			sumM2 += (int)*z;
-			sumR2 += (int)*w;
-			c++; z++; w++;
+			sumL2 += (int)*(c+2);
+			sumM2 += (int)*(z+2);
+			sumR2 += (int)*(w+2);
+			//c++; z++; w++;
 			
 			if (sumL2 <= min) {
 				min = sumL2;
-				minPixel = c - 3; 
+				minPixel = c; 
 			}
 			if (sumL2 > max) {
 				max = sumL2;
-				maxPixel = c - 3;
+				maxPixel = c;
 			}if (sumM2 <= min) {
 				min = sumM2;
-				minPixel = c; // z - 3
+				minPixel = z; // z - 3
 			}
 			if (sumM2 > max) {
 				max = sumM2;
-				maxPixel = c; // z - 3
+				maxPixel = z; // z - 3
 			}if (sumR2 <= min) {
 				min = sumR2;
-				minPixel =  z; // w - 3
+				minPixel =  w; // w - 3
 			}if (sumR2 > max) {
 				max = sumR2;
-				maxPixel = z; // w - 3
+				maxPixel = w; // w - 3
 			}
-			
+			c+=3;z+=3;w+=3;
 			// subtract the value of max and min pixels
 			redSum   -= (int)*(maxPixel)     + (int)*(minPixel);
 			greenSum -= (int)*(maxPixel + 1) + (int)*(minPixel + 1);
