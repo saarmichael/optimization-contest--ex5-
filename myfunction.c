@@ -3,6 +3,7 @@
 
 #define MIN(x,y) ((x<y)?x:y)
 #define MAX(x,y) ((x>y)?x:y)
+#define MULT9(x) ((x << 3) + x)
 
 
 void smoothNoFilter(unsigned int pdim, unsigned char *src, char *dst) {
@@ -29,9 +30,7 @@ void smoothNoFilter(unsigned int pdim, unsigned char *src, char *dst) {
 	unsigned int i, j;
 	// for the even case:
 	if (pdim % 2  == 0) {
-		printf("even case\n");
 		for (i = 1; i < pdim - 1; i++) {
-
 			destr = dst + dim*i + 3*sizeof(unsigned char);
 			destg = dst + dim*i + 4*sizeof(unsigned char);
 			destb = dst + dim*i + 5*sizeof(unsigned char);
@@ -105,17 +104,17 @@ void smoothNoFilter(unsigned int pdim, unsigned char *src, char *dst) {
 				*destg = (unsigned char)(greenSum1 / 9);
 				*destb = (unsigned char)(blueSum1 / 9);
 				// moving on to the next 'pixel'
-				destr += 3*sizeof(unsigned char);
-				destg += 3*sizeof(unsigned char);
-				destb += 3*sizeof(unsigned char);
+				destr += 3;
+				destg += 3;
+				destb += 3;
 				// put the values in the target 'pixel'
 				*destr = (unsigned char)(redSum2 / 9);
 				*destg = (unsigned char)(greenSum2 / 9);
 				*destb = (unsigned char)(blueSum2 / 9);
 				// moving on to the next 'pixel'
-				destr += 3*sizeof(unsigned char);
-				destg += 3*sizeof(unsigned char);
-				destb += 3*sizeof(unsigned char);
+				destr += 3;
+				destg += 3;
+				destb += 3;
 			}
 			// copy the last pixel to dst
 			*(destr) = *(v - 3);
@@ -315,9 +314,9 @@ void sharp(int pdim, unsigned char* src, char* dst) {
 			redSum   -= (int)*ar + (int)*xr + (int)*ur;
 			greenSum -= (int)*ag + (int)*xg + (int)*ug;
 			blueSum  -= (int)*ab + (int)*xb + (int)*ub;
-			redSum   -= (int)*br - 9*(int)*yr + (int)*vr;
-			greenSum -= (int)*bg - 9*(int)*yg + (int)*vg;
-			blueSum  -= (int)*bb - 9*(int)*yb + (int)*vb;
+			redSum   -= (int)*br - MULT9((int)*yr) + (int)*vr;
+			greenSum -= (int)*bg - MULT9((int)*yg) + (int)*vg;
+			blueSum  -= (int)*bb - MULT9((int)*yb) + (int)*vb;
 			redSum   -= (int)*cr + (int)*zr + (int)*wr;
 			greenSum -= (int)*cg + (int)*zg + (int)*wg;
 			blueSum  -= (int)*cb + (int)*zb + (int)*wb;
@@ -387,20 +386,6 @@ void sharp_less_vars(int pdim, unsigned char* src, char* dst) {
 	register int redSum, greenSum, blueSum;
 	unsigned int i, j;
 	for (i = 1; i < pdim - 1; i++) {
-
-		destr = dst + dim*i + 3*sizeof(unsigned char);
-		destg = dst + dim*i + 4*sizeof(unsigned char);
-		destb = dst + dim*i + 5*sizeof(unsigned char);
-
-		a = src + dim*(i-1);
-		b = src + dim*(i);
-		c = src + dim*(i+1);
-		x = src + dim*(i-1) + 3*sizeof(unsigned char);
-		y = src + dim*(i) + 3*sizeof(unsigned char);
-		z = src + dim*(i+1) + 3*sizeof(unsigned char);
-		u = src + dim*(i-1) + 6*sizeof(unsigned char);
-		v = src + dim*(i) + 6*sizeof(unsigned char);
-		w = src + dim*(i+1) + 6*sizeof(unsigned char);
 		// copy the first pixel to dst
 		*(destr - 3) = *b;
 		*(destg - 3) = *(b + 1);
@@ -414,7 +399,7 @@ void sharp_less_vars(int pdim, unsigned char* src, char* dst) {
 			redSum -=   (int)*(a) + (int)*(x) + (int)*(u) + (int)*(b) 
 			          + (int)*(v) + (int)*(c) + (int)*(z) + (int)*(w);
 			
-			redSum += 9 * (int)*(y);
+			redSum += MULT9((int)*(y));
 			a++; x++; u++;
 			b++; y++; v++;
 			c++; z++; w++;
@@ -422,7 +407,7 @@ void sharp_less_vars(int pdim, unsigned char* src, char* dst) {
 			greenSum -=   (int)*(a) + (int)*(x) + (int)*(u) + (int)*(b) 
 			            + (int)*(v) + (int)*(c) + (int)*(z) + (int)*(w);
 			
-			greenSum += 9 * (int)*(y);
+			greenSum += MULT9((int)*(y));
 			a++; x++; u++;
 			b++; y++; v++;
 			c++; z++; w++;
@@ -430,24 +415,53 @@ void sharp_less_vars(int pdim, unsigned char* src, char* dst) {
 			blueSum -=   (int)*(a) + (int)*(x) + (int)*(u) + (int)*(b) 
 			           + (int)*(v) + (int)*(c) + (int)*(z) + (int)*(w);
 			
-			blueSum += 9 * (int)*(y);
+			blueSum += MULT9((int)*(y));
 			a++; x++; u++;
 			b++; y++; v++;
 			c++; z++; w++;
 		
 			// put the values in the target 'pixel'
-			*destr = (unsigned char)(MIN(MAX(redSum, 0), 255));
-			*destg = (unsigned char)(MIN(MAX(greenSum, 0), 255));
-			*destb = (unsigned char)(MIN(MAX(blueSum, 0), 255));
+			// truncate the pixel values [0,255]
+			if (0 != (redSum & 0b10000000000000000000000000000000)) {
+				*destr = (unsigned char) 0;
+			} 
+			else if (0 != (redSum & 0b11111111111111111111111100000000)) {
+				*destr = (unsigned char)255;
+			} else {
+				*destr = redSum;
+			}
+			if (0 != (greenSum & 0b10000000000000000000000000000000)) {
+				*destg = (unsigned char)0;
+			} 
+			else if (0 != (greenSum & 0b11111111111111111111111100000000)) {
+				*destg = (unsigned char)255;
+			} else {
+				*destg = greenSum;
+			}
+			if (0 != (blueSum & 0b10000000000000000000000000000000)) {
+				*destb = (unsigned char)0;
+			} 
+			else if (0 != (blueSum & 0b11111111111111111111111100000000)) {
+				*destb = (unsigned char)255;
+			} else {
+				*destb = blueSum;
+			}
+			
 			// moving on to the next 'pixel'
-			destr += 3*sizeof(unsigned char);
-			destg += 3*sizeof(unsigned char);
-			destb += 3*sizeof(unsigned char);
+			destr += 3;
+			destg += 3;
+			destb += 3;
 		}
 		// copy the last pixel to dst
-		*(destr) = *(v - 3);
-		*(destg) = *(v - 2);
-		*(destb) = *(v - 1);
+
+		*(destr) = *(y);
+		*(destg) = *(y + 1);
+		*(destb) = *(y + 2);
+
+		a+=6; x+=6; u+=6;
+		b+=6; y+=6; v+=6;
+		c+=6; z+=6; w+=6;
+		destr +=6; destg+=6; destb+=6;
 	}
 }
 
@@ -1029,20 +1043,6 @@ void filterChars_less_vars(int pdim, unsigned char *src, char *dst) {
 	unsigned int i, j;
 	for (i = 1; i < pdim - 1; i++) {
 
-		destr = dst + dim*i + 3*sizeof(unsigned char);
-		destg = dst + dim*i + 4*sizeof(unsigned char);
-		destb = dst + dim*i + 5*sizeof(unsigned char);
-
-		// a = src + dim*(i-1);
-		// b = src + dim*(i);
-		// c = src + dim*(i+1);
-		// x = src + dim*(i-1) + 3*sizeof(unsigned char);
-		// y = src + dim*(i) + 3*sizeof(unsigned char);
-		// z = src + dim*(i+1) + 3*sizeof(unsigned char);
-		// u = src + dim*(i-1) + 6*sizeof(unsigned char);
-		// v = src + dim*(i) + 6*sizeof(unsigned char);
-		// w = src + dim*(i+1) + 6*sizeof(unsigned char);
-
 		// copy the first pixel to dst
 		*(destr - 3) = *b;
 		*(destg - 3) = *(b + 1);
@@ -1053,7 +1053,7 @@ void filterChars_less_vars(int pdim, unsigned char *src, char *dst) {
 			greenSum = 0;
 			blueSum = 0;
 			min = 766;
-			max = 0;
+			max = -1;
 
 			// the equivalent of applykernel multiplication
 			redSum   += (int)*a + (int)*x + (int)*u;
@@ -1131,8 +1131,7 @@ void filterChars_less_vars(int pdim, unsigned char *src, char *dst) {
 			if (sumL > max) {
 				max = sumL;
 				maxPixel = b - 3;
-			}
-			if (sumM <= min) {
+			}if (sumM <= min) {
 				min = sumM;
 				minPixel = b; // y - 3
 			}
@@ -1193,31 +1192,55 @@ void filterChars_less_vars(int pdim, unsigned char *src, char *dst) {
 			}
 			
 			// subtract the value of max and min pixels
-			redSum   -= (int)*(maxPixel)   + (int)*(minPixel);
-			greenSum -= (int)*(maxPixel + 1)   + (int)*(minPixel + 1);
-			blueSum  -= (int)*(maxPixel + 2)     + (int)*(minPixel + 2);
+			redSum   -= (int)*(maxPixel)     + (int)*(minPixel);
+			greenSum -= (int)*(maxPixel + 1) + (int)*(minPixel + 1);
+			blueSum  -= (int)*(maxPixel + 2) + (int)*(minPixel + 2);
 
 			// put the values in the target 'pixel'
 			redSum = (redSum / 7);
 			greenSum = (greenSum / 7);
 			blueSum = (blueSum / 7);
-			*destr = (unsigned char)(MIN(MAX(redSum, 0), 255));
-			*destg = (unsigned char)(MIN(MAX(greenSum, 0), 255));
-			*destb = (unsigned char)(MIN(MAX(blueSum, 0), 255));
+
+			// truncate the pixel values [0,255]
+			if (0 != (redSum & 0b10000000000000000000000000000000)) {
+				*destr = (unsigned char) 0;
+			} 
+			else if (0 != (redSum & 0b11111111111111111111111100000000)) {
+				*destr = (unsigned char)255;
+			} else {
+				*destr = redSum;
+			}
+			if (0 != (greenSum & 0b10000000000000000000000000000000)) {
+				*destg = (unsigned char)0;
+			} 
+			else if (0 != (greenSum & 0b11111111111111111111111100000000)) {
+				*destg = (unsigned char)255;
+			} else {
+				*destg = greenSum;
+			}
+			if (0 != (blueSum & 0b10000000000000000000000000000000)) {
+				*destb = (unsigned char)0;
+			} 
+			else if (0 != (blueSum & 0b11111111111111111111111100000000)) {
+				*destb = (unsigned char)255;
+			} else {
+				*destb = blueSum;
+			}
 
 			// moving on to the next 'pixel'
-			destr += 3*sizeof(unsigned char);
-			destg += 3*sizeof(unsigned char);
-			destb += 3*sizeof(unsigned char);
+			destr += 3;
+			destg += 3;
+			destb += 3;
 		}
 		// copy the last pixel to dst
 		*(destr) = *(y);
 		*(destg) = *(y + 1);
-		*(destb) = *(y + 2);
+		*(destb) = *(y +2);
 
 		a+=6; x+=6; u+=6;
 		b+=6; y+=6; v+=6;
 		c+=6; z+=6; w+=6;
+		destr +=6; destg+=6; destb+=6;
 	}
  
 }
