@@ -59,44 +59,44 @@ void smoothNoFilter(unsigned int pdim, unsigned char *src, char *dst) {
 				blueSum2 = 0;
 
 				redSum1 += (int)*(x) + (int)*(u);
-				x++; u++;
-				greenSum1 += (int)*(x) + (int)*(u);
-				x++; u++;
-				blueSum1 += (int)*(x) + (int)*(u);
-				x++; u++;
+				//x++; u++;
+				greenSum1 += (int)*(x+1) + (int)*(u+1);
+				//x++; u++;
+				blueSum1 += (int)*(x+2) + (int)*(u+2);
+				//x++; u++;
 				
 
 				redSum1 += (int)*(y) + (int)*(v);
-				y++; v++;
-				greenSum1 += (int)*(y) + (int)*(v);
-				y++; v++;
-				blueSum1 += (int)*(y) + (int)*(v);
-				y++, v++;
+				//y++; v++;
+				greenSum1 += (int)*(y+1) + (int)*(v+1);
+				//y++; v++;
+				blueSum1 += (int)*(y+2) + (int)*(v+2);
+				//y++, v++;
 
 				redSum1 += (int)*(z) + (int)*(w);
-				z++; w++;
-				greenSum1 += (int)*(z) + (int)*(w);
-				z++; w++;
-				blueSum1 += (int)*(z) + (int)*(w);
-				z++; w++;
+				//z++; w++;
+				greenSum1 += (int)*(z+1) + (int)*(w+1);
+				//z++; w++;
+				blueSum1 += (int)*(z+2) + (int)*(w+2);
+				//z++; w++;
 				
-				redSum2 += redSum1 + (int)*u + (int)*v + (int)*w;
-				u++; v++; w++;
-				greenSum2 += greenSum1 + (int)*u + (int)*v + (int)*w;
-				u++; v++; w++;
-				blueSum2 += blueSum1 + (int)*u + (int)*v + (int)*w;
-				u++; v++; w++;
+				redSum2 += redSum1 + (int)*(u+3) + (int)*(v+3) + (int)*(w+3);
+				//u++; v++; w++;
+				greenSum2 += greenSum1 + (int)*(u+4) + (int)*(v+4) + (int)*(w+4);
+				//u++; v++; w++;
+				blueSum2 += blueSum1 + (int)*(u+5) + (int)*(v+5) + (int)*(w+5);
+				//u++; v++; w++;
 				
 				redSum1 += (int)*a + (int)*b + (int)*c;
-				a++; b++; c++;
-				greenSum1 += (int)*a + (int)*b + (int)*c;
-				a++; b++; c++;
-				blueSum1 += (int)*a + (int)*b + (int)*c;
+				//a++; b++; c++;
+				greenSum1 += (int)*(a+1) + (int)*(b+1) + (int)*(c+1);
+				//a++; b++; c++;
+				blueSum1 += (int)*(a+2) + (int)*(b+2) + (int)*(c+2);
 				
 
-				a+=4; x+=3; 
-				b+=4; y+=3;
-				c+=4; z+=3;
+				a+=6; x+=6; u+=6;
+				b+=6; y+=6; v+=6;
+				c+=6; z+=6; w+=6;
 
 
 				// put the values in the target 'pixel'
