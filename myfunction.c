@@ -1025,30 +1025,40 @@ void filterChars_less_vars(int pdim, unsigned char *src, char *dst) {
 	memcpy(dst, src, dim);
 	// copy the last row of pixels to dst
 	memcpy(dst + ((pdim - 1)*dim), src + ((pdim - 1)*dim), dim);
+	/*
+	{a, x, u}
+	{b, y, v}
+	{c, z, w}
+	*/
 	register unsigned char* a = src;
-	register unsigned char* b = src + dim;
-	register unsigned char* c = src + dim + dim;
 	register unsigned char* x = src + 3;
-	register unsigned char* y = src + dim + 3;
-	register unsigned char* z = src + dim + dim + 3;
 	register unsigned char* u = src + 6;
+	register unsigned char* b = src + dim;
+	register unsigned char* y = src + dim + 3;
 	register unsigned char* v = src + dim + 6;
+	register unsigned char* c = src + dim + dim;
+	register unsigned char* z = src + dim + dim + 3;
 	register unsigned char* w = src + dim + dim + 6;
-	char* destr = dst + dim + 3;
-	char* destg = dst + dim + 4;
-	char* destb = dst + dim + 5;
+	char* destr = dst + dim;
+	char* destg = dst + dim + 1;
+	char* destb = dst + dim + 2;
+	int range = pdim - 1;
 	register int redSum, greenSum, blueSum;
 	unsigned char *maxPixel, *minPixel;
 	register int sumL, sumM, sumR, min, max;
 	unsigned int i, j;
-	for (i = 1; i < pdim - 1; i++) {
+	for (i = 1; i < range; i++) {
 
 		// copy the first pixel to dst
-		*(destr - 3) = *b;
-		*(destg - 3) = *(b + 1);
-		*(destb - 3) = *(b + 2);
+		*(destr) = *b;
+		*(destg) = *(b + 1);
+		*(destb) = *(b + 2);
+		// moving on to the next 'pixel'
+		destr += 3;
+		destg += 3;
+		destb += 3;
 
-		for ( j = 1; j < pdim - 1; j++) {
+		for ( j = 1; j < range; j++) {
 			redSum = 0;
 			greenSum = 0;
 			blueSum = 0;
@@ -1226,11 +1236,11 @@ void filterChars_less_vars(int pdim, unsigned char *src, char *dst) {
 			} else {
 				*destb = blueSum;
 			}
-
 			// moving on to the next 'pixel'
 			destr += 3;
 			destg += 3;
 			destb += 3;
+
 		}
 		// copy the last pixel to dst
 		*(destr) = *(y);
@@ -1240,7 +1250,7 @@ void filterChars_less_vars(int pdim, unsigned char *src, char *dst) {
 		a+=6; x+=6; u+=6;
 		b+=6; y+=6; v+=6;
 		c+=6; z+=6; w+=6;
-		destr +=6; destg+=6; destb+=6;
+		destr +=3; destg+=3; destb+=3;
 	}
  
 }
