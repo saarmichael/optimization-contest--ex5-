@@ -1245,6 +1245,233 @@ void filterChars_less_vars(int pdim, unsigned char *src, char *dst) {
  
 }
 
+void filterChars_less_vars_arrays(int pdim, unsigned char *src, char *dst) {
+	int dim = pdim * 3;
+	// copy the first row of pixels to dst
+	memcpy(dst, src, dim);
+	// copy the last row of pixels to dst
+	memcpy(dst + ((pdim - 1)*dim), src + ((pdim - 1)*dim), dim);
+	register unsigned char* a = src;
+	register unsigned char* b = src + dim;
+	register unsigned char* c = src + dim + dim;
+	register unsigned char* x = src + 3;
+	register unsigned char* y = src + dim + 3;
+	register unsigned char* z = src + dim + dim + 3;
+	register unsigned char* u = src + 6;
+	register unsigned char* v = src + dim + 6;
+	register unsigned char* w = src + dim + dim + 6;
+	char* destr = dst + dim + 3;
+	char* destg = dst + dim + 4;
+	char* destb = dst + dim + 5;
+	register int redSum, greenSum, blueSum;
+	unsigned char *maxPixel, *minPixel;
+	register int minmax[2] = {0, 0};
+	register int intensity[3] = {0, 0, 0};
+	unsigned int i, j;
+	for (i = 1; i < pdim - 1; i++) {
+
+		// copy the first pixel to dst
+		*(destr - 3) = *b;
+		*(destg - 3) = *(b + 1);
+		*(destb - 3) = *(b + 2);
+
+		for ( j = 1; j < pdim - 1; j++) {
+			redSum = 0;
+			greenSum = 0;
+			blueSum = 0;
+			minmax[0] = 766;
+			minmax[1] = -1;
+
+			// the equivalent of applykernel multiplication
+			redSum   += (int)*a + (int)*x + (int)*u;
+			// calculate intensity
+			intensity[0] = (int)*a;
+			intensity[1] = (int)*x;
+			intensity[2] = (int)*u;
+			// move to green
+			a++; x++; u++;
+			greenSum   += (int)*a + (int)*x + (int)*u;
+			// calculate intensity
+			intensity[0] += (int)*a;
+			intensity[1] += (int)*x;
+			intensity[2] += (int)*u;
+			// move to blue
+			a++; x++; u++;
+			blueSum   += (int)*a + (int)*x + (int)*u;
+			// calculate intensity
+			intensity[0] += (int)*a;
+			intensity[1] += (int)*x;
+			intensity[2] += (int)*u;
+			a++; x++; u++;
+			
+			if (intensity[0] <= minmax[0]) {
+				minmax[0] = intensity[0];
+				minPixel = a - 3; 
+			}
+			if (intensity[0] > minmax[1]) {
+				minmax[1] = intensity[0];
+				maxPixel = a - 3;
+			}
+			if (intensity[1] <= minmax[0]) {
+				minmax[0] = intensity[1];
+				minPixel = a; // x - 3
+			}
+			if (intensity[1] > minmax[1]) {
+				minmax[1] = intensity[1];
+				maxPixel = a; // x - 3
+			}
+			if (intensity[2] <= minmax[0]) {
+				minmax[0] = intensity[2];
+				minPixel = x; // u - 3
+			}
+			if (intensity[2] > minmax[1]) {
+				minmax[1] = intensity[2];
+				maxPixel = x; // u - 3
+			}
+			
+
+			redSum   += (int)*b + (int)*y + (int)*v;
+			// calculate intensity
+			intensity[0] = (int)*b;
+			intensity[1] = (int)*y;
+			intensity[2] = (int)*v;
+			// move to green
+			b++; y++; v++;
+			greenSum   += (int)*b + (int)*y + (int)*v;
+			// calculate intensity
+			intensity[0] += (int)*b;
+			intensity[1] += (int)*y;
+			intensity[2] += (int)*v;
+			// move to blue
+			b++; y++; v++;
+			blueSum   += (int)*b + (int)*y + (int)*v;
+			// calculate intensity
+			intensity[0] += (int)*b;
+			intensity[1] += (int)*y;
+			intensity[2] += (int)*v;
+			b++; y++; v++;
+			
+			if (intensity[0] <= minmax[0]) {
+				minmax[0] = intensity[0];
+				minPixel = b - 3; 
+			}
+			if (intensity[0] > minmax[1]) {
+				minmax[1] = intensity[0];
+				maxPixel = b - 3;
+			}if (intensity[1] <= minmax[0]) {
+				minmax[0] = intensity[1];
+				minPixel = b; // y - 3
+			}
+			if (intensity[1] > minmax[1]) {
+				minmax[1] = intensity[1];
+				maxPixel = b; // y - 3
+			}if (intensity[2] <= minmax[0]) {
+				minmax[0] = intensity[2];
+				minPixel = y; // v - 3
+			}
+			if (intensity[2] > minmax[1]) {
+				minmax[1] = intensity[2];
+				maxPixel = y; // v - 3
+			}
+			
+			
+			redSum  += (int)*c + (int)*z + (int)*w;
+			// calculate intensity
+			intensity[0] = (int)*c;
+			intensity[1] = (int)*z;
+			intensity[2] = (int)*w;
+			// move to green
+			c++; z++; w++;
+			greenSum  += (int)*c + (int)*z + (int)*w;
+			// calculate intensity
+			intensity[0] += (int)*c;
+			intensity[1] += (int)*z;
+			intensity[2] += (int)*w;
+			// move to blue
+			c++; z++; w++;
+			blueSum  += (int)*c + (int)*z + (int)*w;
+			// calculate intensity
+			intensity[0] += (int)*c;
+			intensity[1] += (int)*z;
+			intensity[2] += (int)*w;
+			c++; z++; w++;
+			
+			if (intensity[0] <= minmax[0]) {
+				minmax[0] = intensity[0];
+				minPixel = c - 3; 
+			}
+			if (intensity[0] > minmax[1]) {
+				minmax[1] = intensity[0];
+				maxPixel = c - 3;
+			}if (intensity[1] <= minmax[0]) {
+				minmax[0] = intensity[1];
+				minPixel = c; // z - 3
+			}
+			if (intensity[1] > minmax[1]) {
+				minmax[1] = intensity[1];
+				maxPixel = c; // z - 3
+			}if (intensity[2] <= minmax[0]) {
+				minmax[0] = intensity[2];
+				minPixel =  z; // w - 3
+			}if (intensity[2] > minmax[1]) {
+				minmax[1] = intensity[2];
+				maxPixel = z; // w - 3
+			}
+			
+			// subtract the value of max and min pixels
+			redSum   -= (int)*(maxPixel)     + (int)*(minPixel);
+			greenSum -= (int)*(maxPixel + 1) + (int)*(minPixel + 1);
+			blueSum  -= (int)*(maxPixel + 2) + (int)*(minPixel + 2);
+
+			// put the values in the target 'pixel'
+			redSum = (redSum / 7);
+			greenSum = (greenSum / 7);
+			blueSum = (blueSum / 7);
+
+			// truncate the pixel values [0,255]
+			if (0 != (redSum & 0b10000000000000000000000000000000)) {
+				*destr = (unsigned char) 0;
+			} 
+			else if (0 != (redSum & 0b11111111111111111111111100000000)) {
+				*destr = (unsigned char)255;
+			} else {
+				*destr = redSum;
+			}
+			if (0 != (greenSum & 0b10000000000000000000000000000000)) {
+				*destg = (unsigned char)0;
+			} 
+			else if (0 != (greenSum & 0b11111111111111111111111100000000)) {
+				*destg = (unsigned char)255;
+			} else {
+				*destg = greenSum;
+			}
+			if (0 != (blueSum & 0b10000000000000000000000000000000)) {
+				*destb = (unsigned char)0;
+			} 
+			else if (0 != (blueSum & 0b11111111111111111111111100000000)) {
+				*destb = (unsigned char)255;
+			} else {
+				*destb = blueSum;
+			}
+
+			// moving on to the next 'pixel'
+			destr += 3;
+			destg += 3;
+			destb += 3;
+		}
+		// copy the last pixel to dst
+		*(destr) = *(y);
+		*(destg) = *(y + 1);
+		*(destb) = *(y +2);
+
+		a+=6; x+=6; u+=6;
+		b+=6; y+=6; v+=6;
+		c+=6; z+=6; w+=6;
+		destr +=6; destg+=6; destb+=6;
+	}
+ 
+}
+
 
 void doConvolution1(Image *image) {
 
