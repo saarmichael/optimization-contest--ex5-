@@ -5,101 +5,80 @@
 #define MAX(x,y) ((x>y)?x:y)
 #define MULT9(x) ((x << 3) + x)
 
-
+/*
+	the optimizations in this function are as follows:
+	1. LOOP UNROLLING: calculating and updating two pixels each iteration
+	2. SPATIAL LOCALITY: calculations mostly applied over closly located values (ex. a+x+u which are in the same row)
+	3. TEMPORAL LOCALITY: using same variables closly over time 	
+*/
 void smoothNoFilter(unsigned int pdim, unsigned char *src, char *dst) {
-	printf("pdim: %d\n", pdim);
+
 	int dim = pdim * 3;
 	// copy the first row of pixels to dst
 	memcpy(dst, src, dim);
 	// copy the last row of pixels to dst
 	memcpy(dst + ((pdim - 1)*dim), src + ((pdim - 1)*dim), dim);
-	
+	int range = pdim - 1;
+	/*
+	a , x , u
+	b , y , v
+	c , z , w
+	*/
 	register unsigned char* a = src;
-	register unsigned char* b = src + dim;
-	register unsigned char* c = src + dim + dim;
 	register unsigned char* x = src + 3;
-	register unsigned char* y = src + dim + 3;
-	register unsigned char* z = src + dim + dim + 3;
 	register unsigned char* u = src + 6;
+	register unsigned char* b = src + dim;
+	register unsigned char* y = src + dim + 3;
 	register unsigned char* v = src + dim + 6;
+	register unsigned char* c = src + dim + dim;
+	register unsigned char* z = src + dim + dim + 3;
 	register unsigned char* w = src + dim + dim + 6;
-	char* destr = dst + dim + 3;
-	char* destg = dst + dim + 4;
-	char* destb = dst + dim + 5;
-	register int redSum1, greenSum1, blueSum1, redSum2, greenSum2, blueSum2;
+	char* destr = dst + dim;
+	char* destg = dst + dim+1;
+	char* destb = dst + dim+2;
+	register int redSum1, greenSum1, blueSum1;
 	unsigned int i, j;
 	// for the even case:
 	if (pdim % 2  == 0) {
 		for (i = 1; i < pdim - 1; i++) {
-			destr = dst + dim*i + 3*sizeof(unsigned char);
-			destg = dst + dim*i + 4*sizeof(unsigned char);
-			destb = dst + dim*i + 5*sizeof(unsigned char);
-
-			a = src + dim*(i-1);
-			b = src + dim*(i);
-			c = src + dim*(i+1);
-			x = src + dim*(i-1) + 3*sizeof(unsigned char);
-			y = src + dim*(i) + 3*sizeof(unsigned char);
-			z = src + dim*(i+1) + 3*sizeof(unsigned char);
-			u = src + dim*(i-1) + 6*sizeof(unsigned char);
-			v = src + dim*(i) + 6*sizeof(unsigned char);
-			w = src + dim*(i+1) + 6*sizeof(unsigned char);
-
-			// copy the first pixel to dst
-			*(destr - 3) = *b;
-			*(destg - 3) = *(b + 1);
-			*(destb - 3) = *(b + 2);
-
-			for ( j = 1; j < pdim - 1; j+=2) {
+			// copy the first pixel in the row
+			*(destr) = *b;
+			*(destg) = *(b + 1);
+			*(destb) = *(b + 2);
+			// move to the second pixel in the row and start iterating through the row
+			destr+=3;
+			destg+=3;
+			destb+=3;
+			for (j = 1; j < pdim - 1; j+=2) {
 				redSum1 = 0;
 				greenSum1 = 0;
 				blueSum1 = 0;
-				redSum2 = 0;
-				greenSum2 = 0;
-				blueSum2 = 0;
-
-				redSum1 += (int)*(x) + (int)*(u);
-				//x++; u++;
+				// sum the middle vectors (xyz),(uvw)
+				redSum1   += (int)*(x)   + (int)*(u);
 				greenSum1 += (int)*(x+1) + (int)*(u+1);
-				//x++; u++;
-				blueSum1 += (int)*(x+2) + (int)*(u+2);
-				//x++; u++;
-				
+				blueSum1  += (int)*(x+2) + (int)*(u+2);
 
-				redSum1 += (int)*(y) + (int)*(v);
-				//y++; v++;
+				redSum1   += (int)*(y)   + (int)*(v);
 				greenSum1 += (int)*(y+1) + (int)*(v+1);
-				//y++; v++;
-				blueSum1 += (int)*(y+2) + (int)*(v+2);
-				//y++, v++;
+				blueSum1  += (int)*(y+2) + (int)*(v+2);
 
-				redSum1 += (int)*(z) + (int)*(w);
-				//z++; w++;
+				redSum1   += (int)*(z)   + (int)*(w);
 				greenSum1 += (int)*(z+1) + (int)*(w+1);
-				//z++; w++;
-				blueSum1 += (int)*(z+2) + (int)*(w+2);
-				//z++; w++;
+				blueSum1  += (int)*(z+2) + (int)*(w+2);
+				// add the fourth vector (u+3, v+3, w+3)
+				register int redSum2 = 0;
+				register int greenSum2 = 0;
+				register int blueSum2 = 0;
 				
-				redSum2 += redSum1 + (int)*(u+3) + (int)*(v+3) + (int)*(w+3);
-				//u++; v++; w++;
+				redSum2   += redSum1   + (int)*(u+3) + (int)*(v+3) + (int)*(w+3);
 				greenSum2 += greenSum1 + (int)*(u+4) + (int)*(v+4) + (int)*(w+4);
-				//u++; v++; w++;
-				blueSum2 += blueSum1 + (int)*(u+5) + (int)*(v+5) + (int)*(w+5);
-				//u++; v++; w++;
-				
-				redSum1 += (int)*a + (int)*b + (int)*c;
-				//a++; b++; c++;
+				blueSum2  += blueSum1  + (int)*(u+5) + (int)*(v+5) + (int)*(w+5);
+				// add the first vector (abc)
+				redSum1   += (int)*a     + (int)*b     + (int)*c;
 				greenSum1 += (int)*(a+1) + (int)*(b+1) + (int)*(c+1);
-				//a++; b++; c++;
-				blueSum1 += (int)*(a+2) + (int)*(b+2) + (int)*(c+2);
-				
+				blueSum1  += (int)*(a+2) + (int)*(b+2) + (int)*(c+2);
 
-				a+=6; x+=6; u+=6;
-				b+=6; y+=6; v+=6;
-				c+=6; z+=6; w+=6;
-
-
-				// put the values in the target 'pixel'
+				// put the values in the first target 'pixel'
 				*destr = (unsigned char)(redSum1 / 9);
 				*destg = (unsigned char)(greenSum1 / 9);
 				*destb = (unsigned char)(blueSum1 / 9);
@@ -107,7 +86,7 @@ void smoothNoFilter(unsigned int pdim, unsigned char *src, char *dst) {
 				destr += 3;
 				destg += 3;
 				destb += 3;
-				// put the values in the target 'pixel'
+				// put the values in the second target 'pixel'
 				*destr = (unsigned char)(redSum2 / 9);
 				*destg = (unsigned char)(greenSum2 / 9);
 				*destb = (unsigned char)(blueSum2 / 9);
@@ -115,118 +94,90 @@ void smoothNoFilter(unsigned int pdim, unsigned char *src, char *dst) {
 				destr += 3;
 				destg += 3;
 				destb += 3;
+				// move on to the next pixel
+				a+=6; x+=6; u+=6;
+				b+=6; y+=6; v+=6;
+				c+=6; z+=6; w+=6;
 			}
 			// copy the last pixel to dst
-			*(destr) = *(v - 3);
-			*(destg) = *(v - 2);
-			*(destb) = *(v - 1);
+			*(destr) = *(y);
+			*(destg) = *(y+1);
+			*(destb) = *(y+2);
+			// move to the next row
+			a+=6; x+=6; u+=6;
+			b+=6; y+=6; v+=6;
+			c+=6; z+=6; w+=6;
+			destg += 3;
+			destb += 3;
 		}
+	// for the odd case	
 	} else {
+		// basically the same thing is happening here, only difference is at the end of the inner loop
 		for (i = 1; i < pdim - 1; i++) {
-
-			destr = dst + dim*i + 3*sizeof(unsigned char);
-			destg = dst + dim*i + 4*sizeof(unsigned char);
-			destb = dst + dim*i + 5*sizeof(unsigned char);
-
-			a = src + dim*(i-1);
-			b = src + dim*(i);
-			c = src + dim*(i+1);
-			x = src + dim*(i-1) + 3*sizeof(unsigned char);
-			y = src + dim*(i) + 3*sizeof(unsigned char);
-			z = src + dim*(i+1) + 3*sizeof(unsigned char);
-			u = src + dim*(i-1) + 6*sizeof(unsigned char);
-			v = src + dim*(i) + 6*sizeof(unsigned char);
-			w = src + dim*(i+1) + 6*sizeof(unsigned char);
-
-			// copy the first pixel to dst
-			*(destr - 3) = *b;
-			*(destg - 3) = *(b + 1);
-			*(destb - 3) = *(b + 2);
-
+			// // copy the first pixel to dst
+			*(destr ) = *b;
+			*(destg ) = *(b + 1);
+			*(destb ) = *(b + 2);
+			destr += 3;
+			destg += 3;
+			destb += 3;
 			for ( j = 1; j < pdim - 1 ; j+=2) {
 				redSum1 = 0;
 				greenSum1 = 0;
 				blueSum1 = 0;
-				redSum2 = 0;
-				greenSum2 = 0;
-				blueSum2 = 0;
 
-				redSum1 += (int)*(x) + (int)*(u);
-				x++; u++;
-				greenSum1 += (int)*(x) + (int)*(u);
-				x++; u++;
-				blueSum1 += (int)*(x) + (int)*(u);
-				x++; u++;
+				redSum1   += (int)*(x)   + (int)*(u);
+				greenSum1 += (int)*(x+1) + (int)*(u+1);
+				blueSum1  += (int)*(x+2) + (int)*(u+2);
 				
+				redSum1   += (int)*(y)   + (int)*(v);
+				greenSum1 += (int)*(y+1) + (int)*(v+1);
+				blueSum1  += (int)*(y+2) + (int)*(v+2);
 
-				redSum1 += (int)*(y) + (int)*(v);
-				y++; v++;
-				greenSum1 += (int)*(y) + (int)*(v);
-				y++; v++;
-				blueSum1 += (int)*(y) + (int)*(v);
-				y++, v++;
+				redSum1   += (int)*(z)  + (int)*(w);
+				greenSum1 += (int)*(z+1) + (int)*(w+1);
+				blueSum1  += (int)*(z+2) + (int)*(w+2);
 
-				redSum1 += (int)*(z) + (int)*(w);
-				z++; w++;
-				greenSum1 += (int)*(z) + (int)*(w);
-				z++; w++;
-				blueSum1 += (int)*(z) + (int)*(w);
-				z++; w++;
+				register int redSum2 = 0;
+				register int greenSum2 = 0;
+				register int blueSum2 = 0;
+
+				redSum2   += redSum1   + (int)*(u+3) + (int)*(v+3) + (int)*(w+3);
+				greenSum2 += greenSum1 + (int)*(u+4) + (int)*(v+4) + (int)*(w+4);
+				blueSum2  += blueSum1  + (int)*(u+5) + (int)*(v+5) + (int)*(w+5);
 				
-				redSum2 += redSum1 + (int)*u + (int)*v + (int)*w;
-				u++; v++; w++;
-				greenSum2 += greenSum1 + (int)*u + (int)*v + (int)*w;
-				u++; v++; w++;
-				blueSum2 += blueSum1 + (int)*u + (int)*v + (int)*w;
-				u++; v++; w++;
-				
-				redSum1 += (int)*a + (int)*b + (int)*c;
-				a++; b++; c++;
-				greenSum1 += (int)*a + (int)*b + (int)*c;
-				a++; b++; c++;
-				blueSum1 += (int)*a + (int)*b + (int)*c;
-				
-
-				a+=4; x+=3; 
-				b+=4; y+=3;
-				c+=4; z+=3;
-
+				redSum1   += (int)*a     + (int)*b     + (int)*c;
+				greenSum1 += (int)*(a+1) + (int)*(b+1) + (int)*(c+1);
+				blueSum1  += (int)*(a+2) + (int)*(b+2) + (int)*(c+2);
 
 				// put the values in the target 'pixel'
 				*destr = (unsigned char)(redSum1 / 9);
 				*destg = (unsigned char)(greenSum1 / 9);
 				*destb = (unsigned char)(blueSum1 / 9);
 				// moving on to the next 'pixel'
-				destr += 3*sizeof(unsigned char);
-				destg += 3*sizeof(unsigned char);
-				destb += 3*sizeof(unsigned char);
+				destr += 3;
+				destg += 3;
+				destb += 3;
 				// put the values in the target 'pixel'
 				*destr = (unsigned char)(redSum2 / 9);
 				*destg = (unsigned char)(greenSum2 / 9);
 				*destb = (unsigned char)(blueSum2 / 9);
 				// moving on to the next 'pixel'
-				destr += 3*sizeof(unsigned char);
-				destg += 3*sizeof(unsigned char);
-				destb += 3*sizeof(unsigned char);
+				destr += 3;
+				destg += 3;
+				destb += 3;
+				a+=6; x+=6; u+=6;
+				b+=6; y+=6; v+=6;
+				c+=6; z+=6; w+=6;
 			}
-			/*since wer'e in the odd case, the square {{a,x,u}
-													   {b,y,v}
-													   {c,z,w}}
-			is layed out exactly around the pixel which we want to update (the equivalent of y)
-			*/
-			// redSum2   -= (int)*(a - 3) + (int)*(b - 3) + (int)*(c - 3);
-			// greenSum2 -= (int)*(a - 2) + (int)*(b - 2) + (int)*(c - 2);
-			// blueSum2  -= (int)*(a - 1) + (int)*(b - 1) + (int)*(c - 1);
-			// redSum2   += (int)*u       + (int)*v       + (int)*w;
-			// greenSum2 += (int)*(u + 1) + (int)*(v + 1) + (int)*(w + 1);
-			// blueSum2  += (int)*(u + 2) + (int)*(v + 2) + (int)*(w + 2);
-			// *(destr - 3) = redSum2;
-			// *(destg - 3) = greenSum2;
-			// *(destb - 3) = blueSum2;
 			// copy the last pixel to dst
-			*(destr - 3) = *(v - 6);
-			*(destg - 3) = *(v - 5);
-			*(destb - 3) = *(v - 4);
+			*(destr - 3) = *(b);
+			*(destg - 3) = *(b+1);
+			*(destb - 3) = *(b+2);
+			// moving on to the next row
+			a+=3; x+=3; u+=3;
+			b+=3; y+=3; v+=3;
+			c+=3; z+=3; w+=3;
 		}
 	}
 }
