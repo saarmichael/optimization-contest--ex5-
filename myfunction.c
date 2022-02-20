@@ -4,10 +4,10 @@
 /*
 This code is a reconstruction of a another code. The latter is a non-efficient, complicated code
 and this one is an optimized version of it.
-myfunction recives an Image and a user argument, and runs a series of convolutions give a new Image.
+myfunction recives an Image and a user argument, and runs a series of convolutions to create a new Image.
 
-The main approach I took was to give up on using the Pixel and pixel_sum structs, and rather work straight
-on the Images->data which is a char* array of r-g-b bytes.
+The main approach I took was to give up on using the Pixel and pixel_sum structs (as appear in the given bad code), 
+and rather work straight on Images->data, which is a char* (array) of R-G-B bytes.
 This sagnificantlly saves time of copying information from the original Image data to a new pixels array
 */
 
@@ -18,6 +18,72 @@ This sagnificantlly saves time of copying information from the original Image da
 #define MAX(x,y) ((x>y)?x:y)
 #define MULT9(x) ((x << 3) + x)
 
+void doConvolution1(Image *image);
+void doConvolution2(Image *image);
+void doConvolution3(Image *image);
+void smoothNoFilter(unsigned int pdim, unsigned char *src, char *dst);
+void sharp_less_vars(int pdim, unsigned char* src, char* dst);
+void filterChars_less_vars(int pdim, unsigned char *src, char *dst);
+
+void myfunction(Image *image, char* srcImgpName, char* blurRsltImgName, char* sharpRsltImgName, char* filteredBlurRsltImgName, char* filteredSharpRsltImgName, char flag) {
+
+	if (flag == '1') {	
+		// blur image
+		doConvolution1(image);
+
+		// write result image to file
+		writeBMP(image, srcImgpName, blurRsltImgName);	
+
+		// sharpen the resulting image
+		doConvolution2(image);
+		
+		// write result image to file
+		writeBMP(image, srcImgpName, sharpRsltImgName);	
+	} else {
+		// apply extermum filtered kernel to blur image
+		doConvolution3(image);
+
+		// write result image to file
+		writeBMP(image, srcImgpName, filteredBlurRsltImgName);
+
+		// sharpen the resulting image
+		doConvolution2(image);
+
+		// write result image to file
+		writeBMP(image, srcImgpName, filteredSharpRsltImgName);	
+	}
+}
+
+
+/*
+The main approach I took was to give up on using the Pixel and pixel_sum structs, and rather work straight
+on the Images->data which is a char* array of r-g-b bytes.
+This sagnificantlly saves time of copying information from the original Image data to a new pixels array
+*/
+
+void doConvolution1(Image *image) {
+
+	char* newImage = (char*)malloc(3*m*n*sizeof(unsigned char));
+
+	smoothNoFilter(m, image->data, newImage);
+	image->data = newImage;
+}
+
+void doConvolution2(Image *image) {
+
+	char* newImage = (unsigned char*)malloc(3*m*n*sizeof(unsigned char));
+	
+	sharp_less_vars(m, image->data, newImage);
+	image->data = newImage;
+}
+
+void doConvolution3(Image *image) {
+
+	char* newImage = (unsigned char*)malloc(3*m*n*sizeof(unsigned char));
+	
+	filterChars_less_vars(m, image->data, newImage);
+	image->data = newImage;
+}
 
 /*
 	the optimizations in this function are as follows:
@@ -514,61 +580,3 @@ void filterChars_less_vars(int pdim, unsigned char *src, char *dst) {
  
 }
 
-/*
-The main approach I took was to give up on using the Pixel and pixel_sum structs, and rather work straight
-on the Images->data which is a char* array of r-g-b bytes.
-This sagnificantlly saves time of copying information from the original Image data to a new pixels array
-*/
-
-void doConvolution1(Image *image) {
-
-	char* newImage = (char*)malloc(3*m*n*sizeof(unsigned char));
-
-	smoothNoFilter(m, image->data, newImage);
-	image->data = newImage;
-}
-
-void doConvolution2(Image *image) {
-
-	char* newImage = (unsigned char*)malloc(3*m*n*sizeof(unsigned char));
-	
-	sharp_less_vars(m, image->data, newImage);
-	image->data = newImage;
-}
-
-void doConvolution3(Image *image) {
-
-	char* newImage = (unsigned char*)malloc(3*m*n*sizeof(unsigned char));
-	
-	filterChars_less_vars(m, image->data, newImage);
-	image->data = newImage;
-}
-
-void myfunction(Image *image, char* srcImgpName, char* blurRsltImgName, char* sharpRsltImgName, char* filteredBlurRsltImgName, char* filteredSharpRsltImgName, char flag) {
-
-	if (flag == '1') {	
-		// blur image
-		doConvolution1(image);
-
-		// write result image to file
-		writeBMP(image, srcImgpName, blurRsltImgName);	
-
-		// sharpen the resulting image
-		doConvolution2(image);
-		
-		// write result image to file
-		writeBMP(image, srcImgpName, sharpRsltImgName);	
-	} else {
-		// apply extermum filtered kernel to blur image
-		doConvolution3(image);
-
-		// write result image to file
-		writeBMP(image, srcImgpName, filteredBlurRsltImgName);
-
-		// sharpen the resulting image
-		doConvolution2(image);
-
-		// write result image to file
-		writeBMP(image, srcImgpName, filteredSharpRsltImgName);	
-	}
-}
