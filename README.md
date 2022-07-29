@@ -18,7 +18,7 @@ typedef struct {
     unsigned char blue;  
 } pixel;
 ```  
-Let's recall that the Image data is a rwo-dimentional array of bytes, every three consecutive bytes rpresent one pixel.
+Let's recall that the Image data is a two-dimentional array of bytes, every three consecutive bytes rpresent one pixel.
 Therfore, the first operation is converting the array of bytes to an array of *pixel*s.
 The next step is iterating over the imgae and for each pixel, **applying a filter**, evntually changing the value of all pixels. By doing so, a new image is recived and it is a filtered version of the original image.
 **Applying a filter:** each pixel and its eight surrounding pixels form a nine-pixel-square. Based on the option given as a command line argument (1 or 2), the function makes several calculatios over the nine-pixel-square.  
@@ -81,8 +81,8 @@ Putting it all together, I used nine pointers, representing the nine-pixel-squar
 ```
 While it's not very convenient, it has major advanteges:
 - the pointer arithmetic is super fast since the pointers are held in registers. In the slow code each access to memory was depending on an index-calculation, which takes a lot of time.
-- the spatial locality of my code is very high resulting faster access to memory- once a byte in memory is accessed, the access to the following bytes is very fast becuase they are all cached with the first byte
--  
+- the spatial locality of my code is very high resulting faster memory access- once a byte in memory is accessed, the access to the following bytes is very fast becuase they are all cached with the first byte
+-  it was easy to work on several 'pixel-squares' each iteration instead of working only on one square
 
 
 
