@@ -1,92 +1,88 @@
-# optimization-contest
+# Optimization Contest
 
-In this project I was given a very slow code and needed to improve its run time as much as possible.  
-This was practically a contest between the whole class (about 250 students), when grades where given based on the improvement in running time compared to the original code.  
+In this project, I was given a very slow piece of code and tasked with improving its runtime as much as possible.
+This was essentially a competition among the entire class (about 250 students), with grades awarded based on the improvement in execution time compared to the original code.
+
 <img src="images/slow_code_run.png" width="400"> <img src="images/fast_code_run.png" width="470">  
-The first was taken after running the slow code, which took 80ms, and the last picture is the optimized code- 16 times faster!
-### What is the code doing?
-The file *myfunction.c* gets as the first parameter a *.bmp* file, which is a picture format where each pixel is represented by 3 bytes- Red, Green and Blue (RGB).
-The second parameter is a number, defining what type of **filter** the function should apply on the given picture.  
-### How does the slow Code work?
-Let's dive in.  
-I'll go through the general structure in order to later demonstrate the optimizations I made.
-The basic data unit is the pixel: 
-```
+The first image shows the runtime of the original slow code, which took 80ms, while the second image shows the optimized version—16 times faster!
+
+## What Does the Code Do?
+The file *myfunction.c* processes an input *.bmp* file, a bitmap image format where each pixel is represented by three bytes—Red, Green, and Blue (RGB). The second parameter specifies the type of **filter** to be applied to the image.
+
+## How Does the Slow Code Work?
+Let's break it down to highlight the inefficiencies and the optimizations I made.
+
+### Data Representation
+The basic data unit in the image is a pixel, represented by:
+```c
 typedef struct {  
     unsigned char red;  
     unsigned char green;  
     unsigned char blue;  
 } pixel;
-```  
-Let's recall that the Image data is a two-dimentional array of bytes, every three consecutive bytes rpresent one pixel.
-Therfore, the first operation is converting the array of bytes to an array of *pixel*s.
-The next step is iterating over the imgae and for each pixel, **applying a filter**, evntually changing the value of all pixels. By doing so, a new image is recived and it is a filtered version of the original image.
-**Applying a filter:** each pixel and its eight surrounding pixels form a nine-pixel-square. Based on the option given as a command line argument (1 or 2), the function makes several calculatios over the nine-pixel-square.  
-Here is an **example of the inefficiency** of the slow code:
-Notice the use of a nested loop when working on exactly 9 pixels each iteration.
-Also, notice the excessive function calls, when these functions do very basic calculations.
 ```
+
+Since a BMP image is stored as a two-dimensional array of bytes, where every three consecutive bytes represent one pixel, the first operation in the slow code was converting this byte array into an array of *pixel* structures.
+
+Next, the code iterates over the image and applies a filter to each pixel, modifying all pixels in the process to generate a new, filtered image.
+
+### Applying a Filter
+Each pixel and its eight neighboring pixels form a 3x3 square. Depending on the filter option provided as a command-line argument (1 or 2), the function performs calculations on this nine-pixel square.
+
+#### Inefficiencies in the Original Code
+The original implementation contained several inefficiencies:
+- **Nested Loops:** Iterating over 9 pixels per iteration using multiple for-loops.
+- **Excessive Function Calls:** Using separate function calls for basic calculations, adding unnecessary overhead.
+- **Index-Based Memory Access:** Each pixel access required index calculations, significantly slowing down execution.
+
+Example of inefficient code:
+```c
 static pixel applyKernel(int dim, int i, int j, pixel *src, int kernelSize, int kernel[kernelSize][kernelSize], int kernelScale, bool filter) {
-	int ii, jj;
-	int currRow, currCol;
-	pixel_sum sum;
-	pixel current_pixel;
-	int min_intensity = 766; // arbitrary value that is higher than maximum possible intensity, which is 255*3=765
-	int max_intensity = -1; // arbitrary value that is lower than minimum possible intensity, which is 0
-	int min_row, min_col, max_row, max_col;
-	pixel loop_pixel;
-	initialize_pixel_sum(&sum);
-	int istart = max(i-1, 0);
-	int istop = min(i+1, dim-1);
-	for(ii = istart; ii <= istop; ii++) {
-		for(jj = max(j-1, 0); jj <= min(j+1, dim-1); jj++) {
-			int kRow, kCol;
-			// compute row index in kernel
-			if (ii < i) {
-				kRow = 0;
-			} else if (ii > i) {
-				kRow = 2;
-			} else {
-				kRow = 1;
-			}
-			// compute column index in kernel
-			if (jj < j) {
-				kCol = 0;
-			} else if (jj > j) {
-				kCol = 2;
-			} else {
-				kCol = 1;
-			}
-			// apply kernel on pixel at [ii,jj]
-			sum_pixels_by_weight(&sum, src[calcIndex(ii, jj, dim)], kernel[kRow][kCol]);
-		}
-	}
-  ```
-This is only a small example, the whole code is fluded with this style of functions.  
-### How did I optimized the code?  
-The first thing that bothered me looking at the slow code, was the conversion of the byte array to *pixel*s array.
-Using the *pixel* struct is obviously more convenient for writing code, but its need for conversion costs valuable time, so I decided to work directly with the original array of bytes.  
-Before moving on, I used the __*gprof*__ profiler in order to detect which function consumes most of the run time, and found out that this function is *applyKernel* (the function above).  
-Putting it all together, I used nine pointers, representing the nine-pixel-square:  
+    int ii, jj;
+    pixel_sum sum;
+    initialize_pixel_sum(&sum);
+    int istart = max(i-1, 0);
+    int istop = min(i+1, dim-1);
+    for (ii = istart; ii <= istop; ii++) {
+        for (jj = max(j-1, 0); jj <= min(j+1, dim-1); jj++) {
+            int kRow = (ii < i) ? 0 : (ii > i) ? 2 : 1;
+            int kCol = (jj < j) ? 0 : (jj > j) ? 2 : 1;
+            sum_pixels_by_weight(&sum, src[calcIndex(ii, jj, dim)], kernel[kRow][kCol]);
+        }
+    }
 ```
-  register unsigned char* a = src;
-	register unsigned char* x = src + 3;
-	register unsigned char* u = src + 6;
-	register unsigned char* b = src + dim;
-	register unsigned char* y = src + dim + 3;
-	register unsigned char* v = src + dim + 6;
-	register unsigned char* c = src + dim + dim;
-	register unsigned char* z = src + dim + dim + 3;
-	register unsigned char* w = src + dim + dim + 6;
+This is just one example, but similar inefficient patterns were present throughout the code.
+
+## How Did I Optimize the Code?
+
+### Eliminating Unnecessary Conversions
+The first inefficiency I addressed was the conversion of the byte array into an array of *pixel* structures. While *pixel* structures improve code readability, the conversion process adds unnecessary overhead. I decided to work directly with the raw byte array instead.
+
+### Identifying Bottlenecks
+Using the **gprof** profiler, I identified that *applyKernel* (shown above) was the most time-consuming function.
+
+### Using Pointer Arithmetic for Fast Access
+To speed up pixel access, I introduced **register pointers** to directly reference the 3x3 pixel square:
+```c
+register unsigned char* a = src;
+register unsigned char* x = src + 3;
+register unsigned char* u = src + 6;
+register unsigned char* b = src + dim;
+register unsigned char* y = src + dim + 3;
+register unsigned char* v = src + dim + 6;
+register unsigned char* c = src + dim * 2;
+register unsigned char* z = src + dim * 2 + 3;
+register unsigned char* w = src + dim * 2 + 6;
 ```
-While it's not very convenient, it has major advanteges:
-- the pointer arithmetic is super fast since the pointers are held in registers. In the slow code each access to memory was depending on an index-calculation, which takes a lot of time.
-- the spatial locality of my code is very high resulting faster memory access- once a byte in memory is accessed, the access to the following bytes is very fast becuase they are all cached with the first byte
--  it was easy to work on several 'pixel-squares' each iteration instead of working only on one square
 
+### Why is This Faster?
+1. **Pointer Arithmetic is Faster:** Instead of performing index calculations for every pixel access, the pointers are updated directly.
+2. **Better Spatial Locality:** Since pixels are stored sequentially in memory, accessing them via pointers improves cache efficiency, reducing memory access time.
+3. **Processing Multiple Pixels at Once:** Instead of working on a single 3x3 square per iteration, the optimized approach allows multiple pixel squares to be processed in parallel.
 
+## Results
+By implementing these optimizations, I was able to achieve a **16x speedup** compared to the original slow code. This significantly improved performance and ranked among the top solutions in the class.
 
-
-
-
+---
+This project was a great learning experience in performance optimization, profiling, and leveraging low-level memory operations for efficiency.
 
